@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Odamala Mahallu Census 2026</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind Configuration for customized colors and fonts -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Clash Grotesk"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            clash: ['"Clash Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#4f46e5', // High contrast brand Indigo
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#18181b', // Dark zinc for high-contrast buttons
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Fontshare Clash Grotesk Link -->
+  <link href="https://api.fontshare.com/css?f[]=clash-grotesk@300,400,500,600,700&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#fafafa] text-zinc-800 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-zinc-200 py-5 px-6 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold text-zinc-900 tracking-tight">
+          Odamala Mahallu Census 2026
+        </h1>
+        <p class="text-[11px] font-medium text-zinc-400 mt-0.5 uppercase tracking-wider">Official Digital Registry & Household Survey Portal</p>
+      </div>
+      
+      <!-- Mini Progress for Mobile -->
+      <div class="lg:hidden flex items-center justify-between text-[11px] bg-zinc-50 p-2.5 rounded-lg border border-zinc-200 w-full sm:w-auto">
+        <span class="font-medium text-zinc-600" id="mobileStepText">Step 1 of 7: Survey Info</span>
+        <div class="w-20 bg-zinc-200 rounded-full h-1.5 overflow-hidden ml-2 flex-shrink-0">
+          <div class="bg-brand-600 h-1.5 rounded-full transition-all duration-300" id="mobileProgressBar" style="width: 14.3%"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Two-Column Layout Grid Wrapper -->
+  <div class="flex-grow py-8 px-4 max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+    
+    <!-- Sidebar: Step Navigation (lg:col-span-1) -->
+    <aside class="hidden lg:block lg:col-span-1 self-start sticky top-28 bg-slate-900 text-slate-300 rounded-2xl p-6 border border-slate-800 shadow-xl overflow-hidden relative">
+      <div class="relative z-10 space-y-6">
+        <div>
+          <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Mahallu Registry</div>
+          <h2 class="text-base font-semibold text-white tracking-tight mt-1">Progress Tracker</h2>
+        </div>
+        <ol class="space-y-6 relative pl-3.5">
+          <!-- Step A -->
+          <li class="relative flex items-start gap-4 step-item step-active" data-step="A">
+            <div class="vertical-step-connector"></div>
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">A</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-white transition-all duration-200">Survey Info</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Initial Metadata</span>
+            </div>
+          </li>
+          <!-- Step B -->
+          <li class="relative flex items-start gap-4 step-item" data-step="B">
+            <div class="vertical-step-connector"></div>
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">B</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-slate-400 transition-all duration-200">Family Overview</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Demographics</span>
+            </div>
+          </li>
+          <!-- Step C -->
+          <li class="relative flex items-start gap-4 step-item" data-step="C">
+            <div class="vertical-step-connector"></div>
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">C</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-slate-400 transition-all duration-200">Individuals Details</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Profiles & Health</span>
+            </div>
+          </li>
+          <!-- Step D -->
+          <li class="relative flex items-start gap-4 step-item" data-step="D">
+            <div class="vertical-step-connector"></div>
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">D</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-slate-400 transition-all duration-200">House Information</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Property & Assets</span>
+            </div>
+          </li>
+          <!-- Step E -->
+          <li class="relative flex items-start gap-4 step-item" data-step="E">
+            <div class="vertical-step-connector"></div>
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">E</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-slate-400 transition-all duration-200">Financial Assistance</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Welfare & Schemes</span>
+            </div>
+          </li>
+          <!-- Step F -->
+          <li class="relative flex items-start gap-4 step-item" data-step="F">
+            <div class="vertical-step-connector"></div>
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">F</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-slate-400 transition-all duration-200">Expatriate Details</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Residing Abroad</span>
+            </div>
+          </li>
+          <!-- Step G -->
+          <li class="relative flex items-start gap-4 step-item" data-step="G">
+            <span class="step-circle-v relative z-10 flex items-center justify-center w-6 h-6 rounded-full border border-slate-700 text-[10px] font-semibold bg-slate-900 text-slate-400 transition-all duration-200">G</span>
+            <div class="flex flex-col">
+              <span class="font-medium text-xs text-slate-400 transition-all duration-200">Remarks & Review</span>
+              <span class="text-[9px] text-slate-500 mt-0.5">Form Submission</span>
+            </div>
+          </li>
+        </ol>
+        
+        <!-- Live status panel -->
+        <div class="pt-6 border-t border-slate-800 space-y-3">
+          <div class="flex items-center justify-between text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+            <span>Autosave Status</span>
+            <span class="flex items-center gap-1.5 text-emerald-500">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Saved</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Container -->
+    <main class="lg:col-span-3 flex flex-col">
+      <!-- Survey Form Container -->
+      <form id="censusForm" class="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden" novalidate>
+      
+      <!-- Top banner line accent -->
+      <div class="h-1.5 w-full bg-brand-600"></div>
+
+      <!-- Top banner for Current Section info -->
+      <div class="px-6 py-6 sm:px-8 sm:py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-zinc-100">
+        <div>
+          <h2 class="text-lg font-semibold text-zinc-900 tracking-tight" id="sectionTitle">Section A: Survey Information</h2>
+          <p class="text-xs text-zinc-400 mt-1" id="sectionDescription">Initial details and geographical indicators of the surveyed household.</p>
+        </div>
+        <div class="self-start sm:self-center text-[10px] font-medium text-zinc-500 bg-zinc-100 border border-zinc-200 rounded-full px-3.5 py-1" id="desktopStepBadge">
+          Step 1 of 8
+        </div>
+      </div>
+
+      <!-- Form Body Sections -->
+      <div class="p-6 sm:p-8 space-y-6">
+        
+        <!-- SECTION A: Survey Information -->
+        <div class="step-content active" id="step-A-content">
+          <div class="space-y-6">
+            
+            <!-- Geographical Location Metadata -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-map-location-dot text-brand-600"></i>
+                Geographical & Location Indicators
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- GIS Location -->
+                <div>
+                  <label for="gis_location" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">GIS Location / Coordinates</label>
+                  <div class="flex gap-2">
+                    <input type="text" id="gis_location" name="gis_location" placeholder="Latitude, Longitude"
+                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                    <button type="button" id="detectLocationBtn" 
+                      class="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-medium rounded-xl border border-zinc-200 transition duration-150 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                      title="Detect coordinates using GPS">
+                      <i class="fa-solid fa-crosshairs text-[10px]"></i>
+                      <span>Detect</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Cluster -->
+                <div>
+                  <label for="cluster" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Cluster / Block Name</label>
+                  <select id="cluster" name="cluster"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                    <option value="" disabled selected>-- Select Cluster / Block --</option>
+                    <option value="Block A">Block A</option>
+                    <option value="Block B">Block B</option>
+                    <option value="Block C">Block C</option>
+                    <option value="Block D">Block D</option>
+                    <option value="Block E">Block E</option>
+                    <option value="Block F">Block F</option>
+                    <option value="Block G">Block G</option>
+                    <option value="Block H">Block H</option>
+                    <option value="Block I">Block I</option>
+                    <option value="Block J">Block J</option>
+                    <option value="Block K">Block K</option>
+                  </select>
+                </div>
+
+                <!-- House Number -->
+                <div>
+                  <label for="house_number" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">House Number</label>
+                  <input type="text" id="house_number" name="house_number" placeholder="e.g. MH/2026/45B"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- Panchayat -->
+                <div>
+                  <label for="panchayat" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Panchayat / Municipality</label>
+                  <input type="text" id="panchayat" name="panchayat" placeholder="e.g. Odamala Panchayat"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- Ward Number -->
+                <div>
+                  <label for="ward_number" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Ward Number</label>
+                  <input type="number" id="ward_number" name="ward_number" min="1" max="99" placeholder="e.g. 14"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+              </div>
+            </div>
+
+            <!-- Survey Audit Metadata -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-user-check text-brand-600"></i>
+                Survey Audit Details
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Surveyed By Role Selection -->
+                <div>
+                  <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Surveyed By Role</span>
+                  <div class="grid grid-cols-2 gap-3 mt-2">
+                    <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="surveyed_by_role" value="Cluster Coordinator" checked
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Coordinator</span>
+                    </label>
+                    <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="surveyed_by_role" value="Assistant"
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Assistant</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Details Provided By Select -->
+                <div>
+                  <label for="details_provided_by_type" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Details Provided By</label>
+                  <select id="details_provided_by_type" name="details_provided_by_type"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                    <option value="" disabled selected>-- Select Respondent Role --</option>
+                    <option value="Head of Family">Head of Family</option>
+                    <option value="Family Member">Family Member</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <!-- Surveyed By Names (Dynamic sub grid) -->
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                  <!-- Assistant Name (Conditional) -->
+                  <div id="assistantNameContainer" class="hidden">
+                    <label for="assistant_name" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Specify Assistant Name</label>
+                    <input type="text" id="assistant_name" name="assistant_name" placeholder="Name of Assistant"
+                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                  </div>
+
+                  <!-- Details Provided By Name Specify (Conditional) -->
+                  <div id="detailsProvidedByNameContainer" class="hidden md:col-span-2">
+                    <label for="details_provided_by_name" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Specify Respondent Name</label>
+                    <input type="text" id="details_provided_by_name" name="details_provided_by_name" placeholder="Specify Respondent Name"
+                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION B: Family Overview -->
+        <div class="step-content" id="step-B-content">
+          <div class="space-y-6">
+            
+            <!-- Household Identification -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-house-chimney text-brand-600"></i>
+                Household Identification
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- House Name -->
+                <div>
+                  <label for="house_name" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">House Name</label>
+                  <input type="text" id="house_name" name="house_name" placeholder="e.g. Baitul Noor"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- Head of Family -->
+                <div>
+                  <label for="family_head" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Head of Family Name</label>
+                  <input type="text" id="family_head" name="family_head" placeholder="e.g. Moideen Kutty"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- House Owner Gender Selection -->
+                <div>
+                  <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">House Owner</span>
+                  <div class="grid grid-cols-2 gap-3 mt-2">
+                    <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="house_owner_gender" value="Male" checked
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Male</span>
+                    </label>
+                    <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="house_owner_gender" value="Female"
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Female</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Directory -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-address-book text-brand-600"></i>
+                Contact Directory
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Contact Number (Head of Family) -->
+                <div>
+                  <label for="contact_number" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Contact Number (Head of Family)</label>
+                  <input type="tel" id="contact_number" name="contact_number" placeholder="e.g. 9876543210"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- WhatsApp Number (Head of Family) -->
+                <div>
+                  <label for="whatsapp_head" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">WhatsApp (Head of Family)</label>
+                  <input type="tel" id="whatsapp_head" name="whatsapp_head" placeholder="e.g. 9876543210"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- WhatsApp Number (Senior Lady) -->
+                <div>
+                  <label for="whatsapp_senior_lady" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">WhatsApp (Senior Lady)</label>
+                  <input type="tel" id="whatsapp_senior_lady" name="whatsapp_senior_lady" placeholder="e.g. 9876543210"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+              </div>
+            </div>
+
+            <!-- Demographics & Mahallu Fund Status -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-users text-brand-600"></i>
+                Demographics & Mahallu Status
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Total Family Members -->
+                <div>
+                  <label for="total_members" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Total Family Members</label>
+                  <input type="number" id="total_members" name="total_members" min="1" max="50" placeholder="e.g. 5"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                </div>
+
+                <!-- Gender Count Split -->
+                <div class="md:col-span-2">
+                  <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Gender Count Split</span>
+                  <div class="grid grid-cols-2 gap-3 mt-1.5">
+                    <input type="number" id="male_count" name="male_count" min="0" placeholder="Males"
+                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                    <input type="number" id="female_count" name="female_count" min="0" placeholder="Females"
+                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                  </div>
+                </div>
+
+                <!-- Donation Status (Styled checkable grid cards) -->
+                <div class="md:col-span-3">
+                  <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Mahallu Donation Status</span>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-2">
+                    <label class="relative flex items-center justify-center p-3.5 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="donation_status" value="Regular Paid" checked
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Regular / Paid</span>
+                    </label>
+                    <label class="relative flex items-center justify-center p-3.5 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="donation_status" value="Pending"
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Pending / Arrears</span>
+                    </label>
+                    <label class="relative flex items-center justify-center p-3.5 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                      <input type="radio" name="donation_status" value="Exempted"
+                        class="peer sr-only">
+                      <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                      <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Exempted / Aid Recipient</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION C: Individual Details (Dynamic List) -->
+        <div class="step-content" id="step-C-content">
+          <div class="mb-5 flex justify-between items-center bg-zinc-50 border border-zinc-200 p-4 rounded-xl">
+            <div class="text-xs text-zinc-500">
+              <p class="font-medium">Specified in Section B: <span id="sectionBCountVal" class="font-semibold text-zinc-800">--</span> | Added: <span id="currentMembersCountVal" class="font-semibold text-zinc-800">1</span></p>
+            </div>
+            <div id="membersMismatchWarning" class="hidden text-[10px] font-semibold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Count Mismatch</span>
+            </div>
+          </div>
+
+          <div id="membersContainer" class="space-y-5">
+            <!-- Dynamic Family Member Cards -->
+          </div>
+
+          <!-- Add Member Button -->
+          <div class="mt-6 flex justify-center">
+            <button type="button" id="addMemberBtn"
+              class="inline-flex items-center gap-2 px-5 py-3 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition duration-150 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>Add Member Profile</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION D: House Information (formerly Section E) -->
+        <div class="step-content" id="step-D-content">
+          <div class="space-y-6">
+            
+            <!-- Property Details -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-hotel text-brand-600"></i>
+                Property & Building Status
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Ownership -->
+                <div>
+                  <label for="house_ownership" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Ownership</label>
+                  <select id="house_ownership" name="house_ownership"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                    <option value="" disabled selected>-- Select Ownership --</option>
+                    <option value="Owned by Head/Spouse">Owned (Self/Spouse)</option>
+                    <option value="Ancestral Property">Ancestral Property</option>
+                    <option value="Joint Family Owner">Joint Ownership</option>
+                    <option value="Rented House">Rented / Leased</option>
+                    <option value="Waqf / Mahallu Property">Waqf / Mahallu Housing</option>
+                    <option value="No House / Landless">No House (Landless)</option>
+                  </select>
+                </div>
+
+                <!-- Loan Status -->
+                <div>
+                  <label for="house_loan_status" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Loan Status</label>
+                  <select id="house_loan_status" name="house_loan_status"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                    <option value="" disabled selected>-- Select Loan Status --</option>
+                    <option value="No Liabilities">No (Liabilities / Debt Free)</option>
+                    <option value="Yes">Yes (Active Loan / Debt)</option>
+                  </select>
+                </div>
+
+                <!-- Type of House -->
+                <div>
+                  <label for="house_type" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Type of House</label>
+                  <select id="house_type" name="house_type"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                    <option value="" disabled selected>-- Select Type --</option>
+                    <option value="Concrete (RCC)">Concrete (RCC)</option>
+                    <option value="Tiled Roof">Tiled Roof</option>
+                    <option value="Metal/Asbestos Sheets">Metal / Asbestos Sheet</option>
+                    <option value="Mud / Thatch">Mud / Thatch</option>
+                    <option value="Hut / Temporary">Hut / Temporary Cabin</option>
+                  </select>
+                </div>
+
+                <!-- House Structure -->
+                <div>
+                  <label for="house_structure" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">House Structure</label>
+                  <select id="house_structure" name="house_structure"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                    <option value="" disabled selected>-- Select Structure --</option>
+                    <option value="Single Floor">Single Floor</option>
+                    <option value="Double Floor">Double Floor</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vehicles Assets -->
+            <div class="fieldset-group border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+              <h3 class="text-xs font-semibold text-zinc-800 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-car text-brand-600"></i>
+                Vehicle Assets
+              </h3>
+              
+              <div>
+                <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Vehicle Ownership</span>
+                <div class="grid grid-cols-2 gap-3 mt-2 max-w-sm">
+                  <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                    <input type="radio" name="vehicle_ownership" value="Yes"
+                      class="peer sr-only">
+                    <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                    <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Yes</span>
+                  </label>
+                  <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                    <input type="radio" name="vehicle_ownership" value="No" checked
+                      class="peer sr-only">
+                    <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                    <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">No</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Conditional Vehicle Inputs (Hidden by default) -->
+              <div id="vehicleDetailsContainer" class="hidden bg-zinc-50 border border-zinc-200 rounded-2xl p-5 mt-2 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div class="md:col-span-2">
+                    <h4 class="text-xs font-semibold text-zinc-800 mb-2.5 uppercase tracking-wider">Number of Vehicles Owned</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <label for="two_wheelers" class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Two-wheelers</label>
+                        <input type="number" id="two_wheelers" name="two_wheelers" min="0" placeholder="0"
+                          class="block w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm">
+                      </div>
+                      <div>
+                        <label for="three_wheelers" class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Three-wheelers</label>
+                        <input type="number" id="three_wheelers" name="three_wheelers" min="0" placeholder="0"
+                          class="block w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm">
+                      </div>
+                      <div>
+                        <label for="four_wheelers" class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Four-wheelers</label>
+                        <input type="number" id="four_wheelers" name="four_wheelers" min="0" placeholder="0"
+                          class="block w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm">
+                      </div>
+                      <div>
+                        <label for="heavy_vehicles" class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Heavy Vehicles</label>
+                        <input type="number" id="heavy_vehicles" name="heavy_vehicles" min="0" placeholder="0"
+                          class="block w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm">
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="md:col-span-2">
+                    <label for="vehicle_status" class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Vehicle Status</label>
+                    <select id="vehicle_status" name="vehicle_status"
+                      class="block w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+                      <option value="" disabled selected>-- Select Status --</option>
+                      <option value="Private">Private</option>
+                      <option value="Taxi">Taxi</option>
+                      <option value="Commercial">Commercial</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION E: Financial Assistance (formerly Section F) -->
+        <div class="step-content" id="step-E-content">
+          <div class="max-w-xl mx-auto space-y-5">
+            
+            <div>
+              <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Is the family receiving regular government/charity financial assistance?</span>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+                <label class="relative flex items-center p-3.5 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                  <input type="radio" name="financial_assistance" value="Yes"
+                    class="peer sr-only">
+                  <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                  <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Yes, Receiving</span>
+                </label>
+                <label class="relative flex items-center p-3.5 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                  <input type="radio" name="financial_assistance" value="No" checked
+                    class="peer sr-only">
+                  <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                  <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">No, But Needed</span>
+                </label>
+                <label class="relative flex items-center p-3.5 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                  <input type="radio" name="financial_assistance" value="Not Required"
+                    class="peer sr-only">
+                  <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                  <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">No, Not Required</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Conditional Source Input -->
+            <div id="assistanceSourceContainer" class="hidden bg-zinc-50 border border-zinc-200 rounded-2xl p-5">
+              <label for="assistance_source" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Source of Assistance / Scheme</label>
+              <textarea id="assistance_source" name="assistance_source" placeholder="e.g. Widow Pension, Mahallu Charity Fund" rows="3"
+                class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION F: Expatriate Details (formerly Section G) -->
+        <div class="step-content" id="step-F-content">
+          <div class="max-w-xl mx-auto space-y-5">
+            
+            <div>
+              <span class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Are there family members residing/working abroad as Expatriates?</span>
+              <div class="grid grid-cols-2 gap-3 mt-2 max-w-sm">
+                <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                  <input type="radio" name="has_expatriates" value="Yes"
+                    class="peer sr-only">
+                  <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                  <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Yes</span>
+                </label>
+                <label class="relative flex items-center justify-center p-3 border border-zinc-200 rounded-xl cursor-pointer transition bg-white hover:bg-zinc-50">
+                  <input type="radio" name="has_expatriates" value="No" checked
+                    class="peer sr-only">
+                  <div class="absolute inset-0 border border-transparent peer-checked:border-brand-600 peer-checked:bg-indigo-50/20 rounded-xl transition pointer-events-none"></div>
+                  <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">No</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Dynamic Expatriates List Container -->
+            <div id="expatriateDetailsSection" class="hidden space-y-5 border-t border-zinc-100 pt-5">
+              <div id="expatriatesList" class="space-y-5">
+                <!-- Expatriates cards dynamically rendered -->
+              </div>
+
+              <!-- Add Expatriate Button -->
+              <div class="flex justify-center mt-4">
+                <button type="button" id="addExpatriateBtn"
+                  class="inline-flex items-center gap-2 px-5 py-3 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition duration-150 focus:outline-none focus:ring-2 focus:ring-zinc-400">
+                  <i class="fa-solid fa-passport text-zinc-400 text-[10px]"></i>
+                  <span>Add Expatriate Profile</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION G: Remarks & Submission (formerly Section H) -->
+        <div class="step-content" id="step-G-content">
+          <div class="space-y-5 max-w-xl mx-auto">
+            
+            <!-- Owner Remarks -->
+            <div>
+              <label for="owner_remarks" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">House Owner's Remarks About the Family</label>
+              <textarea id="owner_remarks" name="owner_remarks" rows="3" placeholder="Additional details or specific household notes."
+                class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150"></textarea>
+            </div>
+
+            <!-- Committee Suggestions -->
+            <div>
+              <label for="committee_suggestions" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Suggestions / Remarks to the Mahallu Committee</label>
+              <textarea id="committee_suggestions" name="committee_suggestions" rows="3" placeholder="Feedback or suggestions for community development."
+                class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150"></textarea>
+            </div>
+
+            <!-- Survey Validation Preview Summary -->
+            <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 mt-6">
+              <h3 class="text-xs font-semibold text-zinc-800 mb-4 uppercase tracking-wider">
+                Household Registry Summary Check
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="bg-white border border-zinc-200 p-3.5 rounded-xl shadow-sm">
+                  <span class="text-zinc-400 font-medium text-[10px] uppercase tracking-wider block">Head of Family</span>
+                  <span class="font-semibold text-zinc-800 truncate block mt-0.5" id="summaryHead">--</span>
+                </div>
+                <div class="bg-white border border-zinc-200 p-3.5 rounded-xl shadow-sm">
+                  <span class="text-zinc-400 font-medium text-[10px] uppercase tracking-wider block">House Number</span>
+                  <span class="font-semibold text-zinc-800 truncate block mt-0.5" id="summaryHouseNum">--</span>
+                </div>
+                <div class="bg-white border border-zinc-200 p-3.5 rounded-xl shadow-sm">
+                  <span class="text-zinc-400 font-medium text-[10px] uppercase tracking-wider block">Total Members</span>
+                  <span class="font-semibold text-zinc-800 block mt-0.5" id="summaryTotalMembers">--</span>
+                </div>
+                <div class="bg-white border border-zinc-200 p-3.5 rounded-xl shadow-sm">
+                  <span class="text-zinc-400 font-medium text-[10px] uppercase tracking-wider block">Expatriates</span>
+                  <span class="font-semibold text-zinc-800 block mt-0.5" id="summaryExpatriates">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Office Response Section -->
+            <div class="bg-indigo-50/30 border border-indigo-100 rounded-2xl p-5 mt-6">
+              <h3 class="text-xs font-semibold text-indigo-900 mb-4 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-building-shield"></i>
+                Office Response (For Office Use Only)
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4.5">
+                <div>
+                  <label for="office_status" class="block text-[10px] font-medium text-indigo-700/80 mb-1.5 uppercase tracking-wider">Verification Status</label>
+                  <select id="office_status" name="office_status"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm cursor-pointer">
+                    <option value="Pending" selected>Pending Verification</option>
+                    <option value="Approved">Verified & Approved</option>
+                    <option value="Flagged">Flagged / Under Review</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="office_verified_by" class="block text-[10px] font-medium text-indigo-700/80 mb-1.5 uppercase tracking-wider">Verified By</label>
+                  <input type="text" id="office_verified_by" name="office_verified_by" placeholder="Officer Name"
+                    class="block w-full px-3.5 py-2.5 bg-white border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm">
+                </div>
+                <div class="sm:col-span-2">
+                  <label for="office_remarks" class="block text-[10px] font-medium text-indigo-700/80 mb-1.5 uppercase tracking-wider">Office Remarks</label>
+                  <textarea id="office_remarks" name="office_remarks" rows="2" placeholder="Official remarks or verification notes."
+                    class="block w-full px-3.5 py-2.5 bg-white border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm"></textarea>
+                </div>
+              </div>
+            </div>
+
+      </div>
+
+      <!-- Section Navigation Buttons (inside form body) -->
+      <div class="px-6 pb-6 sm:px-8 sm:pb-8 pt-2">
+        <div class="flex items-center justify-between gap-4 pt-5 border-t border-zinc-100">
+          <!-- Previous Button -->
+          <button type="button" id="prevBtn"
+            class="hidden items-center gap-2 px-5 py-2.5 border border-zinc-200 text-zinc-600 bg-white rounded-xl hover:bg-zinc-50 text-xs font-semibold transition duration-150 focus:outline-none focus:ring-2 focus:ring-zinc-300">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+            <span>Previous</span>
+          </button>
+          <!-- Spacer when prev is hidden -->
+          <div class="flex-grow"></div>
+          <!-- Next / Submit Button -->
+          <button type="button" id="nextBtn"
+            class="inline-flex items-center gap-2 px-6 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold transition duration-150 focus:outline-none focus:ring-2 focus:ring-brand-600/35">
+            <span>Next Section</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </main>
+  </div>
+
+  <!-- Footer Info -->
+  <footer class="bg-white border-t border-zinc-200 py-6 text-center text-[10px] font-medium text-zinc-400 mt-16 uppercase tracking-wider">
+    <div class="max-w-4xl mx-auto px-4 space-y-1">
+      <p>© 2026 Odamala Mahallu Committee. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Submission Success Modal Overlay -->
+  <div id="successModal" class="fixed inset-0 bg-zinc-900/50 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full border border-zinc-200 overflow-hidden transform scale-95 transition-all duration-300 opacity-0" id="successModalCard">
+      
+      <div class="p-6 text-center border-b border-zinc-100 bg-zinc-50">
+        <div class="w-12 h-12 bg-emerald-100 border border-emerald-200 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i class="fa-solid fa-check text-emerald-600 text-base"></i>
+        </div>
+        <h3 class="text-base font-semibold text-zinc-900">Survey Submitted</h3>
+        <p class="text-xs text-zinc-400 mt-1">Census details recorded successfully.</p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-5">
+        <div class="text-xs text-zinc-600 space-y-3">
+          <p>Registration for <strong class="text-zinc-950 font-semibold" id="modalHouseholdName">Family</strong> has been logged.</p>
+          <div class="bg-zinc-50 rounded-xl border border-zinc-200 p-4 space-y-2.5 text-xs">
+            <div class="flex justify-between"><span class="text-zinc-400 font-semibold uppercase tracking-wider text-[10px]">Reference:</span> <span class="font-mono text-zinc-950 font-semibold" id="modalRefKey">ODML-123456</span></div>
+            <div class="flex justify-between"><span class="text-zinc-400 font-semibold uppercase tracking-wider text-[10px]">Registered Count:</span> <span class="text-zinc-950 font-semibold" id="modalTotalMembers">--</span></div>
+            <div class="flex justify-between"><span class="text-zinc-400 font-semibold uppercase tracking-wider text-[10px]">Submitted On:</span> <span class="text-zinc-950 font-semibold" id="modalTimestamp">--</span></div>
+          </div>
+        </div>
+
+        <!-- Download Action Buttons -->
+        <div class="flex flex-col gap-2.5 pt-2">
+          <button type="button" id="downloadJsonBtn"
+            class="w-full inline-flex justify-center items-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl transition duration-150">
+            <i class="fa-solid fa-file-arrow-down text-[10px]"></i>
+            <span>Download Data (JSON)</span>
+          </button>
+          
+          <button type="button" id="downloadCsvBtn"
+            class="w-full inline-flex justify-center items-center gap-1.5 px-4 py-2.5 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition duration-150">
+            <i class="fa-solid fa-file-csv text-emerald-600 text-[10px]"></i>
+            <span>Export Record (CSV)</span>
+          </button>
+
+          <button type="button" id="closeModalBtn"
+            class="w-full inline-flex justify-center items-center px-4 py-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-500 text-xs font-semibold rounded-xl border border-zinc-200 transition duration-150 mt-3">
+            Start New Survey
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
