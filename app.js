@@ -2,12 +2,28 @@
  * Odamala Mahallu Census 2026 - Survey Logic (Vanilla JS)
  */
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC7aFZ8KBiSsKSiH7wXJoyajiXbNQetJeQ",
+  authDomain: "mahall-2571a.firebaseapp.com",
+  projectId: "mahall-2571a",
+  storageBucket: "mahall-2571a.firebasestorage.app",
+  messagingSenderId: "1005280778183",
+  appId: "1:1005280778183:web:e87c0d21bbaffae2506be2",
+  measurementId: "G-T71NV8DGTL"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+
 document.addEventListener('DOMContentLoaded', () => {
   
   // ==========================================
   // 1. Application State & Constants
   // ==========================================
-  const STEPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  const STEPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
   let currentStepIdx = 0;
   
   const stepMeta = {
@@ -36,8 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
       desc: 'Details of family members currently residing, working, or studying abroad.'
     },
     'G': {
-      title: 'Section G: Remarks & Review (formerly H)',
-      desc: 'General notes, recommendations to Mahallu committee, and registry submit.'
+      title: 'Section G: Remarks & Review',
+      desc: 'General notes, recommendations to Mahallu committee, and registry summary.'
+    },
+    'H': {
+      title: 'Section H: Office Response',
+      desc: 'Official verification remarks and records logging.'
     }
   };
 
@@ -143,6 +163,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function updateVerifiedByField() {
+    const roleRadio = form.querySelector('input[name="surveyed_by_role"]:checked');
+    const officeVerifiedByInput = document.getElementById('office_verified_by');
+    if (officeVerifiedByInput && roleRadio) {
+      const role = roleRadio.value;
+      if (role === 'Assistant') {
+        const assistantName = document.getElementById('assistant_name')?.value.trim() || '';
+        officeVerifiedByInput.value = assistantName ? `Assistant - ${assistantName}` : 'Assistant';
+      } else {
+        officeVerifiedByInput.value = role; // "Cluster Coordinator"
+      }
+    }
+  }
+
   function showStep(index) {
     // Hide all step panels
     document.querySelectorAll('.step-content').forEach(el => {
@@ -163,6 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Trigger summary panel generation on reaching Step G (Remarks & review)
     if (STEPS[index] === 'G') {
       populateSummaryPreview();
+    }
+    
+    // Trigger verifiedby updates on reaching Step H
+    if (STEPS[index] === 'H') {
+      updateVerifiedByField();
     }
   }
 
@@ -1159,13 +1198,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleSurveySubmission() {
     // Validate final step before processing
-    if (!validateStep('G')) return;
+    if (!validateStep('H')) return;
 
     // Collect all data
     const completeState = getFormState();
     
     // Add Metadata Details
-    const referenceKey = generateRefKey();
+    const clusterClean = (completeState.cluster || '').replace(/\s+/g, '');
+    const wardClean = completeState.ward_number || '';
+    const houseNumClean = (completeState.house_number || '').replace(/\s+/g, '');
+    const referenceKey = `ODML${clusterClean}${wardClean}${houseNumClean}`;
     const timestampStr = new Date().toLocaleString();
 
     completeState.metadata = {
@@ -1176,13 +1218,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     finalCompiledData = completeState;
 
+    // Save to Firestore Database
+    try {
+      const recordPayload = {
+        id: referenceKey,
+        submittedAt: timestampStr,
+        ...completeState
+      };
+      setDoc(doc(db, "submissions", referenceKey), recordPayload)
+        .then(() => console.log("Data successfully uploaded to Firestore:", referenceKey))
+        .catch(err => console.error("Firestore upload failed:", err));
+    } catch (e) {
+      console.error("Error setting doc in Firestore:", e);
+    }
+
+    // Save to localStorage list backup
+    try {
+      const submissions = JSON.parse(localStorage.getItem('odamala_census_submitted') || '[]');
+      submissions.push({
+        id: referenceKey,
+        submittedAt: timestampStr,
+        ...completeState
+      });
+      localStorage.setItem('odamala_census_submitted', JSON.stringify(submissions));
+    } catch (e) {
+      console.error('Error saving submission to backup list:', e);
+    }
+
     // Populate Modal UI
-    const householdNameInput = document.getElementById('house_name').value || 'Household';
-    const familyHeadInput = document.getElementById('family_head').value || 'Family';
-    modalHouseholdName.textContent = `"${householdNameInput}" (${familyHeadInput})`;
-    modalRefKey.textContent = referenceKey;
-    modalTotalMembers.textContent = completeState.total_members;
-    modalTimestamp.textContent = timestampStr;
+    if (modalRefKey) modalRefKey.textContent = referenceKey;
+    if (modalTimestamp) modalTimestamp.textContent = timestampStr;
 
     // Display Modal
     successModal.classList.remove('hidden');
@@ -1410,9 +1475,9 @@ document.addEventListener('DOMContentLoaded', () => {
   addExpatriateBtn.addEventListener('click', () => addExpatriate());
 
   // Modal actions
-  downloadJsonBtn.addEventListener('click', downloadJson);
-  downloadCsvBtn.addEventListener('click', downloadCsv);
-  closeModalBtn.addEventListener('click', resetFormAndStartNew);
+  if (downloadJsonBtn) downloadJsonBtn.addEventListener('click', downloadJson);
+  if (downloadCsvBtn) downloadCsvBtn.addEventListener('click', downloadCsv);
+  if (closeModalBtn) closeModalBtn.addEventListener('click', resetFormAndStartNew);
 
   // Initialize and run state restore
   restoreFormState();

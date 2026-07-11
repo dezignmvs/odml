@@ -1,0 +1,77 @@
+/* CSS Stylesheet for Odamala Mahallu Census 2026 Database View */
+
+body {
+  font-family: 'Clash Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  /* Print-like soft grid pattern for technical dashboard touch */
+  background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+/* Custom Scrollbar for better UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Slide up / Fade transitions */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Detailed Profile Slide Up / Zoom Effect */
+#detailOverlay {
+  transition: opacity 0.25s ease-out;
+}
+
+#detailOverlay:not(.hidden) {
+  display: block;
+}
+
+/* Stat card hover animation */
+.bg-white {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Table styling updates */
+th {
+  letter-spacing: 0.05em;
+}
+
+tr:hover .view-details-btn {
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+/* Custom detail card section animations */
+.bg-zinc-50 {
+  transition: all 0.2s ease-in-out;
+}
+.bg-zinc-50:hover {
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+}

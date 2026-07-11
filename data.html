@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (sessionStorage.getItem('census_logged_in') !== 'true') {
+      window.location.replace('login.html?redirect=data.html');
+    } else if (sessionStorage.getItem('census_passcode_verified') !== 'true') {
+      window.location.replace('login.html?redirect=data.html&step=passcode');
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Odamala Mahallu Census 2026 - Database</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Clash Grotesk"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            clash: ['"Clash Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#18181b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Fontshare Clash Grotesk Link -->
+  <link href="https://api.fontshare.com/css?f[]=clash-grotesk@300,400,500,600,700&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="data.css">
+</head>
+<body class="bg-[#fafafa] text-zinc-800 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-zinc-200 py-5 px-6 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold text-zinc-900 tracking-tight">
+          Odamala Mahallu Census 2026
+        </h1>
+        <p class="text-[11px] font-medium text-zinc-400 mt-0.5 uppercase tracking-wider">Official Digital Registry & Submitted Records Database</p>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-1.5 px-3.5 py-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition duration-150">
+          <i class="fa-solid fa-arrow-left text-[10px]"></i>
+          <span>Back to Survey</span>
+        </a>
+        <button type="button" id="btnLogout" class="flex items-center gap-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-xl border border-red-100 transition duration-150">
+          <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+          <span>Log Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow py-8 px-4 max-w-6xl w-full mx-auto space-y-8">
+    
+    <!-- Summary Stats Header -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Total Households -->
+      <div class="bg-white border border-zinc-200 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Total Households</span>
+          <h3 class="text-3xl font-bold text-zinc-900 mt-1" id="statHouseholds">0</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-brand-600">
+          <i class="fa-solid fa-house-chimney text-lg"></i>
+        </div>
+      </div>
+      
+      <!-- Total Mahallu Members -->
+      <div class="bg-white border border-zinc-200 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Total Mahallu Members</span>
+          <h3 class="text-3xl font-bold text-zinc-900 mt-1" id="statMembers">0</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+          <i class="fa-solid fa-users text-lg"></i>
+        </div>
+      </div>
+
+      <!-- Expatriates Abroad -->
+      <div class="bg-white border border-zinc-200 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Expatriates Abroad</span>
+          <h3 class="text-3xl font-bold text-zinc-900 mt-1" id="statExpats">0</h3>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+          <i class="fa-solid fa-passport text-lg"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters & Actions Bar -->
+    <div class="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+      <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+        <!-- Search and Filter Inputs -->
+        <div class="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Search box -->
+          <div class="relative sm:col-span-2">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+              <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input type="text" id="searchInput" placeholder="Search by ID, Head, House, Ward, Contact, or Members..." 
+              class="w-full pl-9 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition">
+          </div>
+          
+          <!-- Cluster Filter -->
+          <div>
+            <select id="clusterFilter" 
+              class="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition cursor-pointer">
+              <option value="">All Clusters</option>
+              <option value="Block A">Block A</option>
+              <option value="Block B">Block B</option>
+              <option value="Block C">Block C</option>
+              <option value="Block D">Block D</option>
+              <option value="Block E">Block E</option>
+              <option value="Block F">Block F</option>
+              <option value="Block G">Block G</option>
+              <option value="Block H">Block H</option>
+              <option value="Block I">Block I</option>
+              <option value="Block J">Block J</option>
+              <option value="Block K">Block K</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Sorting and Downloads -->
+        <div class="flex sm:flex-row flex-col gap-3 items-stretch sm:items-center">
+          <div class="flex items-center gap-2">
+            <label for="sortSelect" class="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Sort By</label>
+            <select id="sortSelect" 
+              class="px-3.5 py-2 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition cursor-pointer">
+              <option value="date_desc">Submitted (Newest)</option>
+              <option value="date_asc">Submitted (Oldest)</option>
+              <option value="head_asc">Family Head (A-Z)</option>
+              <option value="head_desc">Family Head (Z-A)</option>
+              <option value="members_desc">Members Count (High-Low)</option>
+              <option value="members_asc">Members Count (Low-High)</option>
+            </select>
+          </div>
+
+          <!-- Download Action Buttons -->
+          <div class="flex gap-2">
+            <button type="button" id="btnExportJSON" title="Export Filtered Data as JSON"
+              class="flex items-center gap-1.5 px-3 py-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition">
+              <i class="fa-solid fa-file-code text-indigo-600"></i>
+              <span>JSON</span>
+            </button>
+            <button type="button" id="btnExportCSV" title="Export Filtered Data as CSV"
+              class="flex items-center gap-1.5 px-3 py-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition">
+              <i class="fa-solid fa-file-csv text-emerald-600"></i>
+              <span>CSV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table / Grid Section -->
+    <div class="bg-white border border-zinc-200 rounded-2xl shadow-sm overflow-hidden animate-fade-in">
+      <!-- Desktop Table -->
+      <div class="hidden md:block overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-zinc-50 text-zinc-400 font-semibold border-b border-zinc-200">
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">ID / Reference</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">House Name</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">Head of Family</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">Cluster / Ward</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">Contact</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">Members</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px]">Submitted On</th>
+              <th class="py-4 px-6 uppercase tracking-wider text-[10px] text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="databaseTableBody" class="divide-y divide-zinc-100 text-zinc-700 font-medium">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card Grid (Fallback) -->
+      <div class="md:hidden divide-y divide-zinc-100" id="databaseMobileGrid">
+        <!-- Dynamic mobile cards -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden p-16 text-center space-y-4">
+        <div class="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mx-auto text-zinc-400 border border-zinc-200">
+          <i class="fa-solid fa-database text-xl"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-zinc-800">No Registry Records Found</h4>
+          <p class="text-xs text-zinc-400 mt-1">Try expanding your search query or submit a new household survey.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footprint -->
+  <footer class="bg-white border-t border-zinc-200 py-6 text-center text-[10px] font-medium text-zinc-400 mt-16 uppercase tracking-wider">
+    <div class="max-w-6xl mx-auto px-4">
+      <p>© 2026 Odamala Mahallu Committee. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Household Details Profile Full Overlay -->
+  <div id="detailOverlay" class="fixed inset-0 bg-zinc-950/40 z-50 overflow-y-auto hidden backdrop-blur-[2px] transition duration-300">
+    <div class="min-h-screen py-10 px-4 md:px-10 flex justify-center items-start">
+      <div class="bg-white border border-zinc-200 rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden transition-all duration-300 transform scale-95 opacity-0" id="detailCard">
+        
+        <!-- Detail Header -->
+        <div class="bg-slate-900 text-white p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest bg-slate-800 border border-slate-700 px-3 py-1 rounded-full" id="detailId">ODMLBlockA14MH202612A</span>
+            </div>
+            <h2 class="text-xl md:text-2xl font-bold mt-2.5 tracking-tight" id="detailTitle">Amina Manzil</h2>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Submitted on <span id="detailDate">7/11/2026, 11:22:45 AM</span></p>
+          </div>
+          
+          <button type="button" id="closeDetailBtn" 
+            class="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-xl text-xs font-semibold transition self-start md:self-center shadow-md">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+            <span>Back to Database List</span>
+          </button>
+        </div>
+
+        <!-- Detail Body -->
+        <div class="p-6 md:p-8 space-y-8">
+          
+          <!-- 2-Column Main Profile Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Geographical Location -->
+            <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 space-y-4 shadow-sm hover:border-zinc-300 transition">
+              <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-200 pb-2">
+                <i class="fa-solid fa-map-location-dot text-brand-600"></i>
+                Geographical Indicators
+              </h3>
+              <div class="grid grid-cols-2 gap-y-3.5 gap-x-4 text-xs font-medium">
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Cluster / Block</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valCluster">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Ward Number</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valWard">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">House Number</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valHouseNum">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Panchayat</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valPanchayat">--</span>
+                </div>
+                <div class="col-span-2">
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">GIS Location / Coordinates</span>
+                  <span class="text-zinc-850 block mt-0.5 font-mono text-[11px] bg-white border border-zinc-250 p-2 rounded-lg" id="valGis">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Household Overview -->
+            <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 space-y-4 shadow-sm hover:border-zinc-300 transition">
+              <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-200 pb-2">
+                <i class="fa-solid fa-house-user text-brand-600"></i>
+                Household Identification
+              </h3>
+              <div class="grid grid-cols-2 gap-y-3.5 gap-x-4 text-xs font-medium">
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Head of Family</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valHead">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">House Owner Gender</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valOwnerGender">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Contact Number</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valContact">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">WhatsApp (Head)</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valWhatsappHead">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">WhatsApp (Senior Lady)</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valWhatsappLady">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Mahallu Donation Status</span>
+                  <span class="block mt-0.5 text-[11px]" id="valDonation">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Infrastructure & Property -->
+            <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 space-y-4 shadow-sm hover:border-zinc-300 transition">
+              <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-200 pb-2">
+                <i class="fa-solid fa-hotel text-brand-600"></i>
+                Property & Building Status
+              </h3>
+              <div class="grid grid-cols-2 gap-y-3.5 gap-x-4 text-xs font-medium">
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Ownership</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valOwnership">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Type of House</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valHouseType">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">House Structure</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valStructure">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Loan Liability Status</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valLoan">--</span>
+                </div>
+                <div class="col-span-2 border-t border-zinc-200/80 pt-3">
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Vehicle Assets Owned</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valVehicles">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Welfare & Schemes -->
+            <div class="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 space-y-4 shadow-sm hover:border-zinc-300 transition">
+              <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-zinc-200 pb-2">
+                <i class="fa-solid fa-hand-holding-hand text-brand-600"></i>
+                Welfare & Financial Assistance
+              </h3>
+              <div class="space-y-4 text-xs font-medium">
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Receiving Regular Financial Assistance?</span>
+                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valAssistance">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Source details / Scheme</span>
+                  <div class="bg-white border border-zinc-200 rounded-xl p-3 text-zinc-800 mt-1 min-h-[60px]" id="valAssistanceSource">--</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Expatriate Members -->
+          <div class="space-y-3.5">
+            <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-passport text-brand-600"></i>
+              Expatriate Member Profiles
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="detailExpatsContainer">
+              <!-- Dynamic expat cards -->
+            </div>
+            <div id="detailNoExpats" class="hidden text-zinc-400 text-xs py-4 bg-zinc-50 rounded-xl text-center border border-zinc-200 border-dashed">
+              No family members residing abroad.
+            </div>
+          </div>
+
+          <!-- Family Members -->
+          <div class="space-y-3.5">
+            <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-users text-brand-600"></i>
+              Household Members Biographical Details
+            </h3>
+            <div class="overflow-x-auto border border-zinc-200 rounded-2xl shadow-sm">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-zinc-50 text-zinc-400 font-semibold border-b border-zinc-200">
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Name</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Relation</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Gender</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">DOB</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Marital</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Formal Education</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Qualification</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Profession</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Blood</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Health Conditions</th>
+                  </tr>
+                </thead>
+                <tbody id="detailMembersTableBody" class="divide-y divide-zinc-100 text-zinc-700 font-medium">
+                  <!-- Dynamic member rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Remarks & Office Response -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-zinc-200">
+            <!-- Survey Comments -->
+            <div class="space-y-4 text-xs font-medium">
+              <div>
+                <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Owner's Remarks About the Family</span>
+                <p class="text-zinc-800 mt-1 pl-1 bg-zinc-50 border border-zinc-200 rounded-xl p-3 min-h-[60px]" id="valRemarksOwner">--</p>
+              </div>
+              <div>
+                <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Suggestions to Mahallu Committee</span>
+                <p class="text-zinc-800 mt-1 pl-1 bg-zinc-50 border border-zinc-200 rounded-xl p-3 min-h-[60px]" id="valRemarksCommittee">--</p>
+              </div>
+            </div>
+
+            <!-- Verification Metadata -->
+            <div class="bg-indigo-50/20 border border-indigo-100 rounded-2xl p-5 space-y-4 shadow-sm">
+              <h3 class="text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-building-shield"></i>
+                Office Response
+              </h3>
+              <div class="space-y-3.5 text-xs font-medium">
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Verified By</span>
+                  <span class="text-zinc-800 block mt-0.5 font-bold" id="valVerifiedBy">--</span>
+                </div>
+                <div>
+                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Official Verification Notes / Remarks</span>
+                  <div class="bg-white border border-indigo-100 rounded-xl p-3 text-zinc-850 mt-1 min-h-[70px]" id="valOfficeRemarks">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Scripts -->
+  <script type="module" src="data.js"></script>
+</body>
+</html>
