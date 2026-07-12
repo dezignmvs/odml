@@ -2,9 +2,6 @@
  * Odamala Mahallu Census 2026 - Survey Logic (Vanilla JS)
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyC7aFZ8KBiSsKSiH7wXJoyajiXbNQetJeQ",
   authDomain: "mahall-2571a.firebaseapp.com",
@@ -15,8 +12,8 @@ const firebaseConfig = {
   measurementId: "G-T71NV8DGTL"
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
+const firebaseApp = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', () => {
   
@@ -828,8 +825,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function setInputsRequired(container, isRequired) {
     const inputs = container.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
-      input.removeAttribute('required');
-      clearFieldError(input);
+      if (isRequired) {
+        input.setAttribute('required', 'true');
+      } else {
+        input.removeAttribute('required');
+        clearFieldError(input);
+      }
     });
   }
 
@@ -881,23 +882,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Surveyed By Role Toggle
-  const surveyedByRoleRadios = document.getElementsByName('surveyed_by_role');
-  surveyedByRoleRadios.forEach(radio => {
-    radio.addEventListener('change', (e) => {
+  // Surveyed By Role Toggle (using event delegation on form)
+  form.addEventListener('change', (e) => {
+    if (e.target.name === 'surveyed_by_role') {
       if (e.target.value === 'Assistant') {
         if (assistantNameContainer) {
           assistantNameContainer.classList.remove('hidden');
+          setInputsRequired(assistantNameContainer, true);
         }
       } else {
         if (assistantNameContainer) {
           assistantNameContainer.classList.add('hidden');
+          setInputsRequired(assistantNameContainer, false);
           const assistantInput = document.getElementById('assistant_name');
           if (assistantInput) assistantInput.value = '';
         }
       }
       saveState();
-    });
+    }
   });
 
   // Details Provided By Type Toggle
@@ -1121,10 +1123,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (surveyedByRoleCheck === 'Assistant') {
         if (assistantNameContainer) {
           assistantNameContainer.classList.remove('hidden');
+          setInputsRequired(assistantNameContainer, true);
         }
       } else {
         if (assistantNameContainer) {
           assistantNameContainer.classList.add('hidden');
+          setInputsRequired(assistantNameContainer, false);
         }
       }
 
@@ -1203,10 +1207,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Collect all data
     const completeState = getFormState();
     
-    // Add Metadata Details
-    const clusterClean = (completeState.cluster || '').replace(/\s+/g, '');
-    const wardClean = completeState.ward_number || '';
-    const houseNumClean = (completeState.house_number || '').replace(/\s+/g, '');
+    // Add Metadata Details (sanitize to remove slashes and other invalid path characters)
+    const clusterClean = (completeState.cluster || '').replace(/[^a-zA-Z0-9]/g, '');
+    const wardClean = (completeState.ward_number || '').toString().replace(/[^a-zA-Z0-9]/g, '');
+    const houseNumClean = (completeState.house_number || '').replace(/[^a-zA-Z0-9]/g, '');
     const referenceKey = `ODML${clusterClean}${wardClean}${houseNumClean}`;
     const timestampStr = new Date().toLocaleString();
 
@@ -1218,47 +1222,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     finalCompiledData = completeState;
 
+    const recordPayload = {
+      id: referenceKey,
+      submittedAt: timestampStr,
+      ...completeState
+    };
+
     // Save to Firestore Database
-    try {
-      const recordPayload = {
-        id: referenceKey,
-        submittedAt: timestampStr,
-        ...completeState
-      };
-      setDoc(doc(db, "submissions", referenceKey), recordPayload)
-        .then(() => console.log("Data successfully uploaded to Firestore:", referenceKey))
-        .catch(err => console.error("Firestore upload failed:", err));
-    } catch (e) {
-      console.error("Error setting doc in Firestore:", e);
-    }
+    db.collection("submissions").doc(referenceKey).set(recordPayload)
+      .then(() => {
+        console.log("Data successfully uploaded to Firestore:", referenceKey);
+        
+        // Clear local storage draft ONLY on success to allow starting next census
+        localStorage.removeItem('odamala_census_2026_state');
 
-    // Save to localStorage list backup
-    try {
-      const submissions = JSON.parse(localStorage.getItem('odamala_census_submitted') || '[]');
-      submissions.push({
-        id: referenceKey,
-        submittedAt: timestampStr,
-        ...completeState
+        // Save to localStorage list backup
+        try {
+          const submissions = JSON.parse(localStorage.getItem('odamala_census_submitted') || '[]');
+          submissions.push(recordPayload);
+          localStorage.setItem('odamala_census_submitted', JSON.stringify(submissions));
+        } catch (e) {
+          console.error('Error saving submission to backup list:', e);
+        }
+
+        // Populate Modal UI
+        if (modalRefKey) modalRefKey.textContent = referenceKey;
+        if (modalTimestamp) modalTimestamp.textContent = timestampStr;
+
+        // Display Modal
+        successModal.classList.remove('hidden');
+        // Simple delay for CSS transitions
+        setTimeout(() => {
+          successModalCard.classList.remove('scale-95', 'opacity-0');
+          successModalCard.classList.add('scale-100', 'opacity-100');
+        }, 50);
+      })
+      .catch(err => {
+        console.error("Firestore upload failed:", err);
+        // Do NOT clear localStorage.
+        alert("Upload to Firestore failed (offline or network error). Your typed data has been saved locally as a draft. You can safely retry submitting when your connection is restored.");
       });
-      localStorage.setItem('odamala_census_submitted', JSON.stringify(submissions));
-    } catch (e) {
-      console.error('Error saving submission to backup list:', e);
-    }
-
-    // Populate Modal UI
-    if (modalRefKey) modalRefKey.textContent = referenceKey;
-    if (modalTimestamp) modalTimestamp.textContent = timestampStr;
-
-    // Display Modal
-    successModal.classList.remove('hidden');
-    // Simple delay for CSS transitions
-    setTimeout(() => {
-      successModalCard.classList.remove('scale-95', 'opacity-0');
-      successModalCard.classList.add('scale-100', 'opacity-100');
-    }, 50);
-
-    // Clear local storage on success to allow starting next census
-    localStorage.removeItem('odamala_census_2026_state');
   }
 
   // JSON Download utility
@@ -1422,10 +1425,7 @@ document.addEventListener('DOMContentLoaded', () => {
       expatriatesDetailsSection.classList.add('hidden');
       setInputsRequired(expatriatesDetailsSection, false);
 
-      if (coordinatorNameContainer) {
-        coordinatorNameContainer.classList.add('hidden');
-        setInputsRequired(coordinatorNameContainer, false);
-      }
+
 
       if (assistantNameContainer) {
         assistantNameContainer.classList.add('hidden');

@@ -45,6 +45,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="data.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body class="bg-[#fafafa] text-zinc-800 min-h-screen flex flex-col font-sans">
 
@@ -448,7 +450,22 @@
     </div>
   </div>
 
+  <!-- Firebase App and Firestore Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <!-- Custom Scripts -->
-  <script type="module" src="data.js"></script>
+  <script src="data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnLogout = document.getElementById('btnLogout');
+      if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+          sessionStorage.removeItem('census_logged_in');
+          sessionStorage.removeItem('census_passcode_verified');
+          window.location.replace('login.html');
+        });
+      }
+    });
+  </script>
 </body>
 </html>

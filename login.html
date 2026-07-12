@@ -29,6 +29,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="login.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body class="bg-[#fafafa] min-h-screen flex flex-col justify-between font-sans relative overflow-hidden">
 
@@ -109,7 +111,7 @@
             <i class="fa-solid fa-key text-lg"></i>
           </div>
           <h3 class="text-lg font-bold text-zinc-900 tracking-tight">Security Verification</h3>
-          <p class="text-xs text-zinc-400 font-medium">Enter the 3-digit security passcode to continue.</p>
+          <p class="text-xs text-zinc-400 font-medium">Enter the 6-digit security passcode to continue.</p>
         </div>
 
         <form id="passcodeForm" class="space-y-5">
@@ -120,6 +122,12 @@
             <input type="password" id="p_digit_2" maxlength="1" required pattern="[0-9]" inputmode="numeric"
               class="w-12 h-12 text-center text-xl font-bold border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 shadow-sm transition">
             <input type="password" id="p_digit_3" maxlength="1" required pattern="[0-9]" inputmode="numeric"
+              class="w-12 h-12 text-center text-xl font-bold border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 shadow-sm transition">
+            <input type="password" id="p_digit_4" maxlength="1" required pattern="[0-9]" inputmode="numeric"
+              class="w-12 h-12 text-center text-xl font-bold border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 shadow-sm transition">
+            <input type="password" id="p_digit_5" maxlength="1" required pattern="[0-9]" inputmode="numeric"
+              class="w-12 h-12 text-center text-xl font-bold border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 shadow-sm transition">
+            <input type="password" id="p_digit_6" maxlength="1" required pattern="[0-9]" inputmode="numeric"
               class="w-12 h-12 text-center text-xl font-bold border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 shadow-sm transition">
           </div>
 
@@ -178,7 +186,10 @@
       const pDigit1 = document.getElementById('p_digit_1');
       const pDigit2 = document.getElementById('p_digit_2');
       const pDigit3 = document.getElementById('p_digit_3');
-      const pDigits = [pDigit1, pDigit2, pDigit3];
+      const pDigit4 = document.getElementById('p_digit_4');
+      const pDigit5 = document.getElementById('p_digit_5');
+      const pDigit6 = document.getElementById('p_digit_6');
+      const pDigits = [pDigit1, pDigit2, pDigit3, pDigit4, pDigit5, pDigit6];
 
       // If user is already logged in (credentials ok) and just needs passcode
       if (step === 'passcode' && sessionStorage.getItem('census_logged_in') === 'true') {
@@ -244,7 +255,7 @@
         
         const passcode = pDigits.map(input => input.value).join('');
 
-        if (passcode === '340') {
+        if (passcode === '340340') {
           sessionStorage.setItem('census_passcode_verified', 'true');
           window.location.href = redirect;
         } else {

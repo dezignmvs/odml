@@ -2,9 +2,40 @@
 <html lang="en">
 <head>
   <script>
-    if (sessionStorage.getItem('census_logged_in') !== 'true') {
-      window.location.replace('login.html?redirect=index.html');
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = sessionStorage.getItem('census_logged_in') === 'true';
+      const landingPage = document.getElementById('landingPage');
+      const surveyApp = document.getElementById('surveyApp');
+      
+      if (isLoggedIn) {
+        if (surveyApp) {
+          surveyApp.classList.remove('hidden');
+          surveyApp.classList.add('flex');
+        }
+      } else {
+        if (landingPage) {
+          landingPage.classList.remove('hidden');
+        }
+        
+        // Bind Start button
+        const btnStartSurvey = document.getElementById('btnStartSurvey');
+        if (btnStartSurvey) {
+          btnStartSurvey.addEventListener('click', () => {
+            window.location.href = 'login.html?redirect=index.html';
+          });
+        }
+      }
+
+      // Bind Logout button
+      const btnIndexLogout = document.getElementById('btnIndexLogout');
+      if (btnIndexLogout) {
+        btnIndexLogout.addEventListener('click', () => {
+          sessionStorage.removeItem('census_logged_in');
+          sessionStorage.removeItem('census_passcode_verified');
+          window.location.reload();
+        });
+      }
+    });
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,27 +75,77 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body class="bg-[#fafafa] text-zinc-800 min-h-screen flex flex-col font-sans">
 
-  <!-- Header -->
-  <header class="bg-white border-b border-zinc-200 py-5 px-6 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4">
-        <div>
-          <h1 class="text-xl font-semibold text-zinc-900 tracking-tight">
-            Odamala Mahallu Census 2026
-          </h1>
-          <p class="text-[11px] font-medium text-zinc-400 mt-0.5 uppercase tracking-wider">Official Digital Registry & Household Survey Portal</p>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <a href="data.html" class="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-brand-600 text-xs font-semibold rounded-xl border border-indigo-200 transition duration-150">
-            <i class="fa-solid fa-database text-[10px]"></i>
-            <span>View Database</span>
-          </a>
-        </div>
+  <!-- Landing Page (hidden by default, shown if not logged in) -->
+  <div id="landingPage" class="hidden min-h-screen flex flex-col justify-between relative overflow-hidden bg-[#fafafa]">
+    <!-- Background decorative blur elements -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-100 blur-[100px] opacity-70 pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-emerald-50 blur-[80px] opacity-50 pointer-events-none"></div>
+
+    <!-- Header logo -->
+    <header class="py-6 px-8 flex justify-center z-10">
+      <div class="text-center">
+        <h2 class="text-md font-semibold text-zinc-900 tracking-tight flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-house-chimney text-brand-600 text-xs"></i>
+          <span>Odamala Mahallu Census 2026</span>
+        </h2>
       </div>
+    </header>
+
+    <!-- Landing Main Content -->
+    <main class="w-full max-w-2xl mx-auto p-6 z-10 flex-grow flex flex-col items-center justify-center text-center space-y-8">
+      <div class="space-y-4">
+        <div class="w-16 h-16 rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-brand-600 mx-auto shadow-sm">
+          <i class="fa-solid fa-people-roof text-2xl"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight leading-tight">
+          Mahallu Digital Registry &<br><span class="bg-gradient-to-r from-indigo-600 to-emerald-600 bg-clip-text text-transparent">Household Survey Portal</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-zinc-500 font-medium max-w-md mx-auto leading-relaxed">
+          Welcome to the official Odamala Mahallu digital registry census. Please verify your staff credentials to start or continue household surveys.
+        </p>
+      </div>
+
+      <!-- Action Button -->
+      <div>
+        <button id="btnStartSurvey" class="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl transition duration-150 shadow-md">
+          <span>Start Survey Form</span>
+          <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 px-4 text-center z-10 text-[10px] font-medium text-zinc-400 uppercase tracking-wider">
+      <p>© 2026 Odamala Mahallu Committee. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Survey Application Wrapper -->
+  <div id="surveyApp" class="hidden flex-col min-h-screen flex-grow">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-zinc-200 py-5 px-6 sticky top-0 z-40 shadow-sm">
+      <div class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4">
+          <div>
+            <h1 class="text-xl font-semibold text-zinc-900 tracking-tight">
+              Odamala Mahallu Census 2026
+            </h1>
+            <p class="text-[11px] font-medium text-zinc-400 mt-0.5 uppercase tracking-wider">Official Digital Registry & Household Survey Portal</p>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <button type="button" id="btnIndexLogout" class="flex items-center gap-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-xl border border-red-100 transition duration-150">
+              <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
       
       <!-- Mini Progress for Mobile -->
       <div class="lg:hidden flex items-center justify-between text-[11px] bg-zinc-50 p-2.5 rounded-lg border border-zinc-200 w-full sm:w-auto">
@@ -288,6 +369,13 @@
                       <span class="relative z-10 text-xs font-medium text-zinc-700 peer-checked:text-brand-600">Assistant</span>
                     </label>
                   </div>
+
+                  <!-- Assistant Name (Conditional) -->
+                  <div id="assistantNameContainer" class="hidden mt-3">
+                    <label for="assistant_name" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Specify Assistant Name</label>
+                    <input type="text" id="assistant_name" name="assistant_name" placeholder="Name of Assistant"
+                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
+                  </div>
                 </div>
 
                 <!-- Details Provided By Select -->
@@ -304,13 +392,6 @@
 
                 <!-- Surveyed By Names (Dynamic sub grid) -->
                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                  <!-- Assistant Name (Conditional) -->
-                  <div id="assistantNameContainer" class="hidden">
-                    <label for="assistant_name" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Specify Assistant Name</label>
-                    <input type="text" id="assistant_name" name="assistant_name" placeholder="Name of Assistant"
-                      class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
-                  </div>
-
                   <!-- Details Provided By Name Specify (Conditional) -->
                   <div id="detailsProvidedByNameContainer" class="hidden md:col-span-2">
                     <label for="details_provided_by_name" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Specify Respondent Name</label>
@@ -840,8 +921,13 @@
       </div>
     </div>
   </div>
+  </div>
 
   <!-- Custom Scripts -->
-  <script type="module" src="app.js"></script>
+  <!-- Firebase App and Firestore Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- Custom Scripts -->
+  <script src="app.js"></script>
 </body>
 </html>

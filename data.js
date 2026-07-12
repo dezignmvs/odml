@@ -2,9 +2,6 @@
  * Odamala Mahallu Census 2026 - Database Listing & Details View Logic
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyC7aFZ8KBiSsKSiH7wXJoyajiXbNQetJeQ",
   authDomain: "mahall-2571a.firebaseapp.com",
@@ -15,189 +12,27 @@ const firebaseConfig = {
   measurementId: "G-T71NV8DGTL"
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
+const firebaseApp = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', () => {
   
   // ==========================================
-  // 1. Mock Data Definitions
-  // ==========================================
-  const mockSubmissions = [
-    {
-      id: "ODMLBlockA14MH202612A",
-      submittedAt: "7/11/2026, 10:15:30 AM",
-      cluster: "Block A",
-      ward_number: "14",
-      house_number: "MH/2026/12A",
-      panchayat: "Odamala Panchayat",
-      gis_location: "11.012345, 76.123456",
-      surveyed_by_role: "Cluster Coordinator",
-      details_provided_by_type: "Head of Family",
-      details_provided_by_name: "",
-      house_name: "Baitul Noor",
-      family_head: "Moideen Kutty",
-      house_owner_gender: "Male",
-      contact_number: "9876543210",
-      whatsapp_head: "9876543210",
-      whatsapp_senior_lady: "9876543211",
-      total_members: "4",
-      male_count: "2",
-      female_count: "2",
-      donation_status: "Regular Paid",
-      house_ownership: "Owned by Head/Spouse",
-      house_loan_status: "No Liabilities",
-      house_type: "Concrete",
-      house_structure: "Double Floor",
-      vehicle_ownership: "Yes",
-      vehicle_status: "Private",
-      two_wheelers: "1",
-      three_wheelers: "0",
-      four_wheelers: "1",
-      heavy_vehicles: "0",
-      financial_assistance: "No",
-      assistance_source: "",
-      has_expatriates: "Yes",
-      expatriates: [
-        { name: "Faisal Moideen", country: "UAE", contact: "+971501234567", profession: "Sales Executive" }
-      ],
-      members: [
-        { name: "Moideen Kutty", relationship: "Self", gender: "Male", dob: "1971-05-15", marital_status: "Married", formal_education: "Yes", educational_qualification: "SSLC", profession: "Coolie", blood_group: "O+", health_status: ["Healthy"] },
-        { name: "Amina Kutty", relationship: "Spouse", gender: "Female", dob: "1978-08-20", marital_status: "Married", formal_education: "Yes", educational_qualification: "7th Std", profession: "Housewife", blood_group: "B+", health_status: ["Healthy"] },
-        { name: "Faisal Moideen", relationship: "Son", gender: "Male", dob: "2001-11-10", marital_status: "Unmarried", formal_education: "Yes", educational_qualification: "B.Tech", profession: "Sales Executive", blood_group: "O+", health_status: ["Healthy"] },
-        { name: "Fathima Moideen", relationship: "Daughter", gender: "Female", dob: "2006-03-12", marital_status: "Unmarried", formal_education: "Ongoing", educational_qualification: "Plus Two", profession: "Student", blood_group: "A+", health_status: ["Healthy"] }
-      ],
-      owner_remarks: "We have lived in Block A for 15 years.",
-      committee_suggestions: "Need better street lights on Block A main road.",
-      office_verified_by: "Cluster Coordinator",
-      office_remarks: "All details verified and found correct."
-    },
-    {
-      id: "ODMLBlockC08MH202678B",
-      submittedAt: "7/11/2026, 11:22:45 AM",
-      cluster: "Block C",
-      ward_number: "8",
-      house_number: "MH/2026/78B",
-      panchayat: "Odamala Panchayat",
-      gis_location: "11.012400, 76.123500",
-      surveyed_by_role: "Assistant",
-      assistant_name: "Zainul Abid",
-      details_provided_by_type: "Family Member",
-      details_provided_by_name: "Amina Beevi",
-      house_name: "Amina Manzil",
-      family_head: "Amina Beevi",
-      house_owner_gender: "Female",
-      contact_number: "9946123456",
-      whatsapp_head: "9946123456",
-      whatsapp_senior_lady: "9946123456",
-      total_members: "3",
-      male_count: "1",
-      female_count: "2",
-      donation_status: "Pending",
-      house_ownership: "Ancestral Property",
-      house_loan_status: "Yes",
-      house_type: "Tiled Roof",
-      house_structure: "Single Floor",
-      vehicle_ownership: "No",
-      financial_assistance: "Yes",
-      assistance_source: "Widow Pension, Mahallu Charity Fund",
-      has_expatriates: "No",
-      expatriates: [],
-      members: [
-        { name: "Amina Beevi", relationship: "Self", gender: "Female", dob: "1966-02-14", marital_status: "Widowed", formal_education: "Yes", educational_qualification: "5th Std", profession: "Pensioner", blood_group: "AB+", health_status: ["Healthy"] },
-        { name: "Sajid K.", relationship: "Son", gender: "Male", dob: "2004-09-05", marital_status: "Unmarried", formal_education: "Yes", educational_qualification: "Plus Two", profession: "Coolie", blood_group: "O+", health_status: ["Healthy"] },
-        { name: "Shefeena K.", relationship: "Daughter", gender: "Female", dob: "2008-07-22", marital_status: "Unmarried", formal_education: "Ongoing", educational_qualification: "10th Std", profession: "Student", blood_group: "B+", health_status: ["Healthy"] }
-      ],
-      owner_remarks: "Requires financial aid for roof repairs before monsoon.",
-      committee_suggestions: "Requests consideration for Mahallu housing aid.",
-      office_verified_by: "Assistant - Zainul Abid",
-      office_remarks: "Flagged for welfare committee review due to loan liability."
-    },
-    {
-      id: "ODMLBlockK05MH2026105",
-      submittedAt: "7/11/2026, 01:45:10 PM",
-      cluster: "Block K",
-      ward_number: "5",
-      house_number: "MH/2026/105",
-      panchayat: "Odamala Panchayat",
-      gis_location: "11.013000, 76.124000",
-      surveyed_by_role: "Cluster Coordinator",
-      details_provided_by_type: "Head of Family",
-      details_provided_by_name: "",
-      house_name: "Al Yasmeen",
-      family_head: "Kader Haji",
-      house_owner_gender: "Male",
-      contact_number: "9845112233",
-      whatsapp_head: "9845112233",
-      whatsapp_senior_lady: "9845998877",
-      total_members: "5",
-      male_count: "3",
-      female_count: "2",
-      donation_status: "Regular Paid",
-      house_ownership: "Owned by Head/Spouse",
-      house_loan_status: "No Liabilities",
-      house_type: "Concrete",
-      house_structure: "Double Floor",
-      vehicle_ownership: "Yes",
-      vehicle_status: "Private",
-      two_wheelers: "2",
-      three_wheelers: "0",
-      four_wheelers: "2",
-      heavy_vehicles: "0",
-      financial_assistance: "Not Required",
-      assistance_source: "",
-      has_expatriates: "Yes",
-      expatriates: [
-        { name: "Yousef Kader", country: "Qatar", contact: "+97455123456", profession: "Engineer" },
-        { name: "Anas Kader", country: "Saudi Arabia", contact: "+96650987654", profession: "Accountant" }
-      ],
-      members: [
-        { name: "Kader Haji", relationship: "Self", gender: "Male", dob: "1964-04-10", marital_status: "Married", formal_education: "Yes", educational_qualification: "Pre-Degree", profession: "Merchant", blood_group: "A+", health_status: ["Healthy"] },
-        { name: "Mariyam", relationship: "Spouse", gender: "Female", dob: "1970-10-12", marital_status: "Married", formal_education: "Yes", educational_qualification: "SSLC", profession: "Housewife", blood_group: "O+", health_status: ["Healthy"] },
-        { name: "Yousef Kader", relationship: "Son", gender: "Male", dob: "1994-12-05", marital_status: "Married", formal_education: "Yes", educational_qualification: "B.Tech", profession: "Engineer", blood_group: "A+", health_status: ["Healthy"] },
-        { name: "Anas Kader", relationship: "Son", gender: "Male", dob: "1998-06-25", marital_status: "Unmarried", formal_education: "Yes", educational_qualification: "B.Com", profession: "Accountant", blood_group: "B+", health_status: ["Healthy"] },
-        { name: "Shifa Yousef", relationship: "Other", gender: "Female", dob: "2000-01-15", marital_status: "Married", formal_education: "Yes", educational_qualification: "Degree", profession: "Housewife", blood_group: "O+", health_status: ["Healthy"] }
-      ],
-      owner_remarks: "",
-      committee_suggestions: "",
-      office_verified_by: "Cluster Coordinator",
-      office_remarks: "Information confirmed."
-    }
-  ];
-
-  // ==========================================
-  // 2. State & Initialization
+  // 1. State & Initialization
   // ==========================================
   let allSubmissions = [];
 
   async function loadSubmissions() {
     try {
-      const querySnapshot = await getDocs(collection(db, "submissions"));
+      const querySnapshot = await db.collection("submissions").get();
       let tempSubmissions = [];
       querySnapshot.forEach((docSnap) => {
         tempSubmissions.push(docSnap.data());
       });
-      
-      if (tempSubmissions.length === 0) {
-        console.log("Firestore submissions collection is empty. Seeding mock data...");
-        for (const mockItem of mockSubmissions) {
-          try {
-            await setDoc(doc(db, "submissions", mockItem.id), mockItem);
-            tempSubmissions.push(mockItem);
-          } catch (seedErr) {
-            console.error("Failed to seed mock document:", mockItem.id, seedErr);
-          }
-        }
-      }
       allSubmissions = tempSubmissions;
     } catch (e) {
-      console.error("Firestore loading failed. Falling back to local storage:", e);
-      const stored = localStorage.getItem('odamala_census_submitted');
-      if (stored) {
-        allSubmissions = JSON.parse(stored);
-      } else {
-        allSubmissions = [...mockSubmissions];
-      }
+      console.error("Firestore loading failed:", e);
+      allSubmissions = [];
     }
     
     // Update stats and render list view
@@ -359,6 +194,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-50 text-zinc-600 border border-zinc-200">${val || 'N/A'}</span>`;
   }
 
+  function deleteRecord(itemId) {
+    if (confirm(`Are you sure you want to delete the record for ID: ${itemId}?`)) {
+      // 1. Delete from Firestore
+      db.collection("submissions").doc(itemId).delete()
+        .then(() => {
+          console.log(`Document ${itemId} deleted successfully from Firestore.`);
+        })
+        .catch(err => {
+          console.error("Error deleting from Firestore:", err);
+        });
+
+      // 2. Delete from local state array
+      allSubmissions = allSubmissions.filter(sub => sub.id !== itemId);
+
+      // 3. Update stats and refresh view
+      updateStats();
+      renderView();
+    }
+  }
+
   function renderView() {
     const records = getFilteredAndSortedData();
     
@@ -387,10 +242,16 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td class="py-4 px-6 text-zinc-400 font-medium text-[11px]">${item.date || item.submittedAt || 'N/A'}</td>
         <td class="py-4 px-6 text-right">
-          <button class="view-details-btn inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-brand-600 text-brand-600 hover:text-white rounded-lg text-[11px] font-bold border border-indigo-100 transition shadow-sm">
-            <span>View Profile</span>
-            <i class="fa-solid fa-chevron-right text-[8px]"></i>
-          </button>
+          <div class="flex items-center justify-end gap-2">
+            <button class="view-details-btn inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-brand-600 text-brand-600 hover:text-white rounded-lg text-[11px] font-bold border border-indigo-100 transition shadow-sm">
+              <span>View Profile</span>
+              <i class="fa-solid fa-chevron-right text-[8px]"></i>
+            </button>
+            <button class="delete-record-btn inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg text-[11px] font-bold border border-red-100 transition shadow-sm">
+              <i class="fa-solid fa-trash-can text-[10px]"></i>
+              <span>Delete</span>
+            </button>
+          </div>
         </td>
       `;
       
@@ -402,6 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       tr.querySelector('.view-details-btn').addEventListener('click', () => {
         showDetailOverlay(item);
+      });
+      tr.querySelector('.delete-record-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteRecord(item.id);
       });
       databaseTableBody.appendChild(tr);
 
@@ -424,10 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><i class="fa-solid fa-calendar mr-1"></i> ${item.date || item.submittedAt}</div>
         </div>
 
-        <div class="flex justify-end pt-1">
+        <div class="flex justify-end pt-1 gap-2">
           <button class="view-details-btn-mobile w-full flex items-center justify-center gap-1 py-2 bg-indigo-50 text-brand-600 rounded-lg text-xs font-bold border border-indigo-100 transition shadow-sm">
             <span>View Detailed Profile</span>
             <i class="fa-solid fa-chevron-right text-[9px]"></i>
+          </button>
+          <button class="delete-record-btn-mobile flex-shrink-0 flex items-center justify-center gap-1 px-4 py-2 bg-red-50 text-red-650 rounded-lg text-xs font-bold border border-red-100 transition shadow-sm">
+            <i class="fa-solid fa-trash-can text-[11px]"></i>
+            <span>Delete</span>
           </button>
         </div>
       `;
@@ -438,6 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       card.querySelector('.view-details-btn-mobile').addEventListener('click', () => {
         showDetailOverlay(item);
+      });
+      card.querySelector('.delete-record-btn-mobile').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteRecord(item.id);
       });
       databaseMobileGrid.appendChild(card);
     });
@@ -705,15 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Logout Event Listener
-  const btnLogout = document.getElementById('btnLogout');
-  if (btnLogout) {
-    btnLogout.addEventListener('click', () => {
-      sessionStorage.removeItem('census_logged_in');
-      sessionStorage.removeItem('census_passcode_verified');
-      window.location.replace('login.html');
-    });
-  }
+
 
   // Load and Render
   loadSubmissions();
