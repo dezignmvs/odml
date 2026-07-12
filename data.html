@@ -296,10 +296,6 @@
                   <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valHead">--</span>
                 </div>
                 <div>
-                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">House Owner Gender</span>
-                  <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valOwnerGender">--</span>
-                </div>
-                <div>
                   <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Contact Number</span>
                   <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valContact">--</span>
                 </div>
@@ -310,10 +306,6 @@
                 <div>
                   <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">WhatsApp (Senior Lady)</span>
                   <span class="text-zinc-850 block mt-0.5 text-[11px]" id="valWhatsappLady">--</span>
-                </div>
-                <div>
-                  <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Mahallu Donation Status</span>
-                  <span class="block mt-0.5 text-[11px]" id="valDonation">--</span>
                 </div>
               </div>
             </div>
@@ -382,6 +374,20 @@
             </div>
           </div>
 
+          <!-- Student Academic Profiles -->
+          <div class="space-y-3.5">
+            <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-graduation-cap text-brand-600"></i>
+              Academic Profiles (Students)
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="detailStudentsContainer">
+              <!-- Dynamic student cards -->
+            </div>
+            <div id="detailNoStudents" class="hidden text-zinc-400 text-xs py-4 bg-zinc-50 rounded-xl text-center border border-zinc-200 border-dashed">
+              No family members are currently pursuing academic studies.
+            </div>
+          </div>
+
           <!-- Family Members -->
           <div class="space-y-3.5">
             <h3 class="text-xs font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-1.5">
@@ -398,7 +404,8 @@
                     <th class="py-3 px-4 uppercase tracking-wider text-[9px]">DOB</th>
                     <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Marital</th>
                     <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Formal Education</th>
-                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Qualification</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Highest Achievement</th>
+                    <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Religious Education</th>
                     <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Profession</th>
                     <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Blood</th>
                     <th class="py-3 px-4 uppercase tracking-wider text-[9px]">Health Conditions</th>
@@ -416,8 +423,8 @@
             <!-- Survey Comments -->
             <div class="space-y-4 text-xs font-medium">
               <div>
-                <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Owner's Remarks About the Family</span>
-                <p class="text-zinc-800 mt-1 pl-1 bg-zinc-50 border border-zinc-200 rounded-xl p-3 min-h-[60px]" id="valRemarksOwner">--</p>
+                <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Remarks from Head of Family</span>
+                <p class="text-zinc-800 mt-1 pl-1 bg-zinc-50 border border-zinc-200 rounded-xl p-3 min-h-[60px]" id="valRemarksHead">--</p>
               </div>
               <div>
                 <span class="text-zinc-400 block text-[9px] uppercase tracking-wider">Suggestions to Mahallu Committee</span>

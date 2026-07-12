@@ -75,11 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const valGis = document.getElementById('valGis');
 
   const valHead = document.getElementById('valHead');
-  const valOwnerGender = document.getElementById('valOwnerGender');
   const valContact = document.getElementById('valContact');
   const valWhatsappHead = document.getElementById('valWhatsappHead');
   const valWhatsappLady = document.getElementById('valWhatsappLady');
-  const valDonation = document.getElementById('valDonation');
 
   const valOwnership = document.getElementById('valOwnership');
   const valHouseType = document.getElementById('valHouseType');
@@ -93,9 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const detailExpatsContainer = document.getElementById('detailExpatsContainer');
   const detailNoExpats = document.getElementById('detailNoExpats');
 
+  const detailStudentsContainer = document.getElementById('detailStudentsContainer');
+  const detailNoStudents = document.getElementById('detailNoStudents');
+
   const detailMembersTableBody = document.getElementById('detailMembersTableBody');
 
-  const valRemarksOwner = document.getElementById('valRemarksOwner');
+  const valRemarksHead = document.getElementById('valRemarksHead');
   const valRemarksCommittee = document.getElementById('valRemarksCommittee');
   const valVerifiedBy = document.getElementById('valVerifiedBy');
   const valOfficeRemarks = document.getElementById('valOfficeRemarks');
@@ -333,11 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
     valGis.textContent = item.gis_location || 'Not Configured';
 
     valHead.textContent = item.family_head || '--';
-    valOwnerGender.textContent = item.house_owner_gender || '--';
     valContact.textContent = item.contact_number || '--';
     valWhatsappHead.textContent = item.whatsapp_head || 'None';
     valWhatsappLady.textContent = item.whatsapp_senior_lady || 'None';
-    valDonation.innerHTML = getDonationBadgeHTML(item.donation_status);
 
     valOwnership.textContent = item.house_ownership || '--';
     valHouseType.textContent = item.house_type || '--';
@@ -383,6 +382,31 @@ document.addEventListener('DOMContentLoaded', () => {
       detailNoExpats.classList.remove('hidden');
     }
 
+    // Students
+    detailStudentsContainer.innerHTML = '';
+    if (item.students && item.students.length > 0) {
+      detailNoStudents.classList.add('hidden');
+      item.students.forEach(student => {
+        const memberIdx = parseInt(student.memberIdx);
+        const memberName = item.members && item.members[memberIdx] ? item.members[memberIdx].name : `Member #${memberIdx + 1}`;
+        
+        const studDiv = document.createElement('div');
+        studDiv.className = 'bg-white border border-zinc-200 rounded-xl p-4 shadow-sm';
+        studDiv.innerHTML = `
+          <h5 class="text-xs font-bold text-zinc-900 truncate">${memberName}</h5>
+          <div class="grid grid-cols-2 gap-y-1.5 mt-2.5 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">
+            <div class="col-span-2">Institution: <span class="text-zinc-800 font-normal block font-sans truncate normal-case tracking-normal">${student.institution_name || 'N/A'}</span></div>
+            <div>Class/Course: <span class="text-zinc-800 font-normal block font-sans truncate normal-case tracking-normal">${student.class_course || 'N/A'}</span></div>
+            <div>Career Goal: <span class="text-zinc-800 font-normal block font-sans truncate normal-case tracking-normal">${student.career_goal || 'N/A'}</span></div>
+            <div class="col-span-2 mt-1">Achievements: <span class="text-zinc-800 font-normal block font-sans truncate normal-case tracking-normal">${student.student_achievements || 'None'}</span></div>
+          </div>
+        `;
+        detailStudentsContainer.appendChild(studDiv);
+      });
+    } else {
+      detailNoStudents.classList.remove('hidden');
+    }
+
     // Members list rows
     detailMembersTableBody.innerHTML = '';
     if (item.members && item.members.length > 0) {
@@ -401,6 +425,10 @@ document.addEventListener('DOMContentLoaded', () => {
           }).join('');
         }
 
+        // Format religious education & profession (handling arrays)
+        const relEdStr = (member.religious_education || []).join(', ') + (member.religious_education_other ? ` (Other: ${member.religious_education_other})` : '');
+        const profStr = (member.profession || []).join(', ') + (member.profession_other ? ` (Other: ${member.profession_other})` : '');
+
         tr.innerHTML = `
           <td class="py-3.5 px-4 font-semibold text-zinc-900">${member.name || '--'}</td>
           <td class="py-3.5 px-4 text-zinc-600">${member.relationship || '--'}</td>
@@ -408,19 +436,20 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="py-3.5 px-4 text-zinc-500 font-mono">${member.dob || '--'}</td>
           <td class="py-3.5 px-4 text-zinc-600">${member.marital_status || '--'}</td>
           <td class="py-3.5 px-4 text-zinc-600">${member.formal_education || '--'}</td>
-          <td class="py-3.5 px-4 text-zinc-600">${member.educational_qualification || '--'}</td>
-          <td class="py-3.5 px-4 text-zinc-600">${member.profession || '--'}</td>
+          <td class="py-3.5 px-4 text-zinc-600">${member.highest_achievement || '--'}</td>
+          <td class="py-3.5 px-4 text-zinc-600">${relEdStr || '--'}</td>
+          <td class="py-3.5 px-4 text-zinc-600">${profStr || '--'}</td>
           <td class="py-3.5 px-4 text-zinc-500 font-bold">${member.blood_group || '--'}</td>
           <td class="py-3.5 px-4 text-left font-sans">${healthBadges}</td>
         `;
         detailMembersTableBody.appendChild(tr);
       });
     } else {
-      detailMembersTableBody.innerHTML = `<tr><td colspan="10" class="py-4 text-center text-zinc-400 font-medium bg-zinc-50">No member bio records attached.</td></tr>`;
+      detailMembersTableBody.innerHTML = `<tr><td colspan="11" class="py-4 text-center text-zinc-400 font-medium bg-zinc-50">No member bio records attached.</td></tr>`;
     }
 
     // Remarks
-    valRemarksOwner.textContent = item.owner_remarks || 'None recorded.';
+    valRemarksHead.textContent = item.head_remarks || item.owner_remarks || 'None recorded.';
     valRemarksCommittee.textContent = item.committee_suggestions || 'None recorded.';
     valVerifiedBy.textContent = item.office_verified_by || 'Not Verified';
     valOfficeRemarks.textContent = item.office_remarks || 'No official notes added.';
@@ -468,13 +497,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const records = getFilteredAndSortedData();
     
     const headers = [
-      'ID/Reference', 'Submitted At', 'Cluster', 'Ward', 'House Number', 'Panchayat', 'GIS Location',
-      'House Name', 'Family Head', 'Owner Gender', 'Contact Number', 'WhatsApp Head', 'WhatsApp Lady',
-      'Donation Status', 'Ownership', 'House Type', 'Structure', 'Loan Status', 'Vehicle Ownership',
-      'Vehicle Status', 'Two Wheelers', 'Three Wheelers', 'Four Wheelers', 'Heavy Vehicles',
-      'Financial Assistance', 'Assistance Source', 'Expatriates Count', 'Office Remarks', 'Verified By',
-      'Member Name', 'Member Relationship', 'Member Gender', 'Member DOB', 'Member Marital Status',
-      'Member Formal Education', 'Member Qualification', 'Member Profession', 'Member Blood Group', 'Member Health Status'
+      'Reference Key', 'Submitted At', 'Surveyed By Role', 'Surveyed By Name', 'Respondent Role', 'Respondent Name', 'GIS Location', 'Cluster', 
+      'House Number', 'Panchayat', 'Ward Number', 'House Name', 'Family Head', 
+      'Contact Number', 'WhatsApp (Head)', 'WhatsApp (Senior Lady)', 'Total Family Members', 'Number of Males', 'Number of Females', 
+      'House Ownership', 'House Loan Status', 'Type of House', 'House Structure', 'Vehicle Ownership', 'Vehicle Status', 
+      'Two Wheelers', 'Three Wheelers', 'Four Wheelers', 'Heavy Vehicles', 'Financial Assistance Received', 'Assistance Source', 
+      'Expatriates Count', 'Office Verified By', 'Office Remarks', 'Remarks from Head of Family', 'Suggestions to Mahallu',
+      'Member Name', 'Member Gender', 'Member DOB', 'Member Relation', 'Member Marital Status', 
+      'Member Formal Education', 'Member Highest Achievement', 'Member Religious Education', 
+      'Member Profession', 'Member Blood Group', 'Member Mobile', 'Member Health Status',
+      'Student Institution', 'Student Class Course', 'Student Career Goal', 'Student Achievements'
     ];
     
     let csvRows = [headers.join(',')];
@@ -485,22 +517,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const baseCols = [
         `"${item.id || ''}"`,
         `"${item.date || item.submittedAt || ''}"`,
+        `"${item.surveyed_by_role || 'Cluster Coordinator'}"`,
+        `"${(item.surveyed_by_name || '').replace(/"/g, '""')}"`,
+        `"${(item.details_provided_by_type || '').replace(/"/g, '""')}"`,
+        `"${(item.details_provided_by_name || '').replace(/"/g, '""')}"`,
+        `"${(item.gis_location || '').replace(/"/g, '""')}"`,
         `"${(item.cluster || '').replace(/"/g, '""')}"`,
-        `"${item.ward_number || ''}"`,
         `"${(item.house_number || '').replace(/"/g, '""')}"`,
         `"${(item.panchayat || '').replace(/"/g, '""')}"`,
-        `"${(item.gis_location || '').replace(/"/g, '""')}"`,
+        `"${item.ward_number || ''}"`,
         `"${(item.house_name || '').replace(/"/g, '""')}"`,
         `"${(item.family_head || '').replace(/"/g, '""')}"`,
-        `"${item.house_owner_gender || 'Male'}"`,
         `"${item.contact_number || ''}"`,
         `"${item.whatsapp_head || ''}"`,
         `"${item.whatsapp_senior_lady || ''}"`,
-        `"${item.donation_status || ''}"`,
+        `"${item.total_members || ''}"`,
+        `"${item.male_count || 0}"`,
+        `"${item.female_count || 0}"`,
         `"${item.house_ownership || ''}"`,
+        `"${item.house_loan_status || ''}"`,
         `"${item.house_type || ''}"`,
         `"${item.house_structure || ''}"`,
-        `"${item.house_loan_status || ''}"`,
         `"${item.vehicle_ownership || 'No'}"`,
         `"${item.vehicle_status || 'N/A'}"`,
         `"${item.two_wheelers || 0}"`,
@@ -510,29 +547,50 @@ document.addEventListener('DOMContentLoaded', () => {
         `"${item.financial_assistance || ''}"`,
         `"${(item.assistance_source || '').replace(/"/g, '""')}"`,
         `"${expatsCount}"`,
+        `"${(item.office_verified_by || '').replace(/"/g, '""')}"`,
         `"${(item.office_remarks || '').replace(/"/g, '""')}"`,
-        `"${(item.office_verified_by || '').replace(/"/g, '""')}"`
+        `"${(item.head_remarks || item.owner_remarks || '').replace(/"/g, '""')}"`,
+        `"${(item.committee_suggestions || '').replace(/"/g, '""')}"`
       ];
 
       if (item.members && item.members.length > 0) {
-        item.members.forEach(m => {
+        item.members.forEach((m, mIdx) => {
+          const studentInfo = item.students?.find(s => parseInt(s.memberIdx) === mIdx) || {};
+          const studentInstitution = studentInfo.institution_name || '';
+          const studentClassCourse = studentInfo.class_course || '';
+          const studentCareerGoal = studentInfo.career_goal || '';
+          const studentAchievements = studentInfo.student_achievements || '';
+
+          const relEdStr = (m.religious_education || []).join('; ') + (m.religious_education_other ? ` (Other: ${m.religious_education_other})` : '');
+          const profStr = (m.profession || []).join('; ') + (m.profession_other ? ` (Other: ${m.profession_other})` : '');
+
           const memberCols = [
             `"${(m.name || '').replace(/"/g, '""')}"`,
-            `"${m.relationship || ''}"`,
             `"${m.gender || ''}"`,
             `"${m.dob || ''}"`,
+            `"${m.relationship || ''}"`,
             `"${m.marital_status || ''}"`,
-            `"${m.formal_education || ''}"`,
-            `"${(m.educational_qualification || '').replace(/"/g, '""')}"`,
-            `"${(m.profession || '').replace(/"/g, '""')}"`,
+            `"${(m.formal_education || '').replace(/"/g, '""')}"`,
+            `"${(m.highest_achievement || '').replace(/"/g, '""')}"`,
+            `"${relEdStr.replace(/"/g, '""')}"`,
+            `"${profStr.replace(/"/g, '""')}"`,
             `"${m.blood_group || ''}"`,
+            `"${m.mobile || ''}"`,
             `"${(m.health_status || []).join('; ')}"`
           ];
-          csvRows.push([...baseCols, ...memberCols].join(','));
+
+          const studentCols = [
+            `"${studentInstitution.replace(/"/g, '""')}"`,
+            `"${studentClassCourse.replace(/"/g, '""')}"`,
+            `"${studentCareerGoal.replace(/"/g, '""')}"`,
+            `"${studentAchievements.replace(/"/g, '""')}"`
+          ];
+
+          csvRows.push([...baseCols, ...memberCols, ...studentCols].join(','));
         });
       } else {
-        const emptyMemberCols = ['', '', '', '', '', '', '', '', '', ''];
-        csvRows.push([...baseCols, ...emptyMemberCols].join(','));
+        const emptyCols = Array(16).fill('""');
+        csvRows.push([...baseCols, ...emptyCols].join(','));
       }
     });
 

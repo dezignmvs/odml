@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // 1. Application State & Constants
   // ==========================================
-  const STEPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const STEPS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
   let currentStepIdx = 0;
   
   const stepMeta = {
@@ -29,31 +29,35 @@ document.addEventListener('DOMContentLoaded', () => {
       desc: 'Initial details, geographical indicators, and surveyed coordinator/assistant roles.'
     },
     'B': {
-      title: 'Section B: Family Overview',
-      desc: 'General house name, head of household, occupancy, and demographic metrics.'
+      title: 'Section B: Family Information',
+      desc: 'General house name, head of family, occupancy, and demographic metrics.'
     },
     'C': {
       title: 'Section C: Individual Details',
       desc: 'Biographical registry, education, profession, contact, and health details of each family member.'
     },
     'D': {
-      title: 'Section D: House Information (formerly E)',
-      desc: 'Property details, building status, loan liability, and vehicle ownership details.'
+      title: 'Section D: Student Information',
+      desc: 'Academic details, course of study, and career goals for household students.'
     },
     'E': {
-      title: 'Section E: Financial Assistance (formerly F)',
-      desc: 'Welfare benefits, government schemes, and charity funding status.'
+      title: 'Section E: House Information',
+      desc: 'Property details, building status, loan liability, and vehicle ownership details.'
     },
     'F': {
-      title: 'Section F: Expatriate Details (formerly G)',
-      desc: 'Details of family members currently residing, working, or studying abroad.'
+      title: 'Section F: Financial Assistance',
+      desc: 'Welfare benefits, government schemes, and charity funding status.'
     },
     'G': {
-      title: 'Section G: Remarks & Review',
-      desc: 'General notes, recommendations to Mahallu committee, and registry summary.'
+      title: 'Section G: Expatriate Details',
+      desc: 'Details of family members residing, working, or studying abroad.'
     },
     'H': {
-      title: 'Section H: Office Response',
+      title: 'Section H: Remarks & Review',
+      desc: 'General notes, suggestions to Mahallu committee, and registry summary.'
+    },
+    'I': {
+      title: 'Section I: Office Use',
       desc: 'Official verification remarks and records logging.'
     }
   };
@@ -61,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // State structure for dynamic rows
   let members = [];
   let expatriates = [];
+  let students = [];
 
   // ==========================================
   // 2. DOM Elements
@@ -90,6 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const assistanceSourceContainer = document.getElementById('assistanceSourceContainer');
   const assistantNameContainer = document.getElementById('assistantNameContainer');
   const detailsProvidedByNameContainer = document.getElementById('detailsProvidedByNameContainer');
+
+  // Section D Student details selectors
+  const studentsContainer = document.getElementById('studentsContainer');
+  const sectionDCountVal = document.getElementById('sectionDCountVal');
+  const noStudentsMessage = document.getElementById('noStudentsMessage');
 
   // Modal elements
   const successModal = document.getElementById('successModal');
@@ -162,15 +172,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateVerifiedByField() {
     const roleRadio = form.querySelector('input[name="surveyed_by_role"]:checked');
+    const nameInput = document.getElementById('surveyed_by_name');
     const officeVerifiedByInput = document.getElementById('office_verified_by');
-    if (officeVerifiedByInput && roleRadio) {
-      const role = roleRadio.value;
-      if (role === 'Assistant') {
-        const assistantName = document.getElementById('assistant_name')?.value.trim() || '';
-        officeVerifiedByInput.value = assistantName ? `Assistant - ${assistantName}` : 'Assistant';
-      } else {
-        officeVerifiedByInput.value = role; // "Cluster Coordinator"
-      }
+    if (officeVerifiedByInput) {
+      const role = roleRadio ? roleRadio.value : 'Cluster Coordinator';
+      const name = nameInput ? nameInput.value.trim() : '';
+      officeVerifiedByInput.value = name ? `${role} (${name})` : role;
     }
   }
 
@@ -191,14 +198,130 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWizardIndicators();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Trigger summary panel generation on reaching Step G (Remarks & review)
-    if (STEPS[index] === 'G') {
+    // Trigger dynamic students population on entering Step D
+    if (STEPS[index] === 'D') {
+      populateStudentsList();
+    }
+
+    // Trigger summary panel generation on reaching Step H (Remarks & review)
+    if (STEPS[index] === 'H') {
       populateSummaryPreview();
     }
     
-    // Trigger verifiedby updates on reaching Step H
-    if (STEPS[index] === 'H') {
+    // Trigger verifiedby updates on reaching Step I
+    if (STEPS[index] === 'I') {
       updateVerifiedByField();
+    }
+  }
+
+  // ==========================================
+  // Section D: Dynamic Students Handling
+  // ==========================================
+
+  function renderStudentCard(memberIdx, memberName) {
+    const card = document.createElement('div');
+    card.className = 'student-card bg-white border border-zinc-200 rounded-2xl p-5 relative transition duration-200 hover:border-zinc-300 shadow-sm';
+    card.dataset.memberIndex = memberIdx;
+    
+    // Retrieve previous state details if any from localStorage/state cache
+    let institution = '';
+    let classCourse = '';
+    let careerGoal = '';
+    let achievements = '';
+
+    try {
+      const storedState = JSON.parse(localStorage.getItem('odamala_census_2026_state') || '{}');
+      const existingStudentData = storedState.students?.find(s => parseInt(s.memberIdx) === memberIdx) || {};
+      institution = existingStudentData.institution_name || '';
+      classCourse = existingStudentData.class_course || '';
+      careerGoal = existingStudentData.career_goal || '';
+      achievements = existingStudentData.student_achievements || '';
+    } catch (e) {
+      console.warn("Could not load stored student data:", e);
+    }
+    
+    card.innerHTML = `
+      <div class="flex justify-between items-center mb-4 border-b border-zinc-100 pb-2.5">
+        <h4 class="text-xs font-semibold text-zinc-800 flex items-center gap-1.5 uppercase tracking-wider">
+          <i class="fa-solid fa-graduation-cap text-brand-600 animate-pulse"></i>
+          Student Profile: <span class="text-zinc-950 font-bold normal-case">${memberName}</span>
+        </h4>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4.5">
+        <!-- Institution Name -->
+        <div>
+          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Institution Name</label>
+          <input type="text" name="student[${memberIdx}][institution_name]" placeholder="e.g. Govt College" value="${institution}" required
+            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+        </div>
+
+        <!-- Class / Course -->
+        <div>
+          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Class / Course</label>
+          <input type="text" name="student[${memberIdx}][class_course]" placeholder="e.g. Plus Two, B.Sc Physics" value="${classCourse}" required
+            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+        </div>
+
+        <!-- Career Goal -->
+        <div>
+          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Career Goal</label>
+          <input type="text" name="student[${memberIdx}][career_goal]" placeholder="e.g. Civil Servant, Engineer" value="${careerGoal}" required
+            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+        </div>
+
+        <!-- Major Achievement(s) -->
+        <div>
+          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Major Achievement(s)</label>
+          <input type="text" name="student[${memberIdx}][student_achievements]" placeholder="e.g. School Topper" value="${achievements}"
+            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+        </div>
+      </div>
+    `;
+    
+    // Bind inputs changes to auto save
+    card.querySelectorAll('input').forEach(input => {
+      const handler = () => {
+        saveState();
+      };
+      input.addEventListener('change', handler);
+      input.addEventListener('input', handler);
+    });
+    
+    studentsContainer.appendChild(card);
+    students.push({
+      element: card,
+      memberIdx: memberIdx
+    });
+  }
+
+  function populateStudentsList() {
+    studentsContainer.innerHTML = '';
+    students = [];
+    
+    let studentCount = 0;
+    
+    members.forEach((member, currentIdx) => {
+      const card = member.element;
+      const nameVal = card.querySelector(`[name="member[${currentIdx}][name]"]`)?.value.trim() || `Family Member #${currentIdx + 1}`;
+      
+      // Check if Student is checked in profession
+      const studentCbs = card.querySelectorAll(`.member-${currentIdx}-prof-checkbox`);
+      const studentCb = Array.from(studentCbs).find(cb => cb.value === 'Student');
+      const isStudent = studentCb ? studentCb.checked : false;
+      
+      if (isStudent) {
+        studentCount++;
+        renderStudentCard(currentIdx, nameVal);
+      }
+    });
+    
+    if (sectionDCountVal) sectionDCountVal.textContent = studentCount;
+    
+    if (studentCount > 0) {
+      if (noStudentsMessage) noStudentsMessage.classList.add('hidden');
+    } else {
+      if (noStudentsMessage) noStudentsMessage.classList.remove('hidden');
     }
   }
 
@@ -355,6 +478,16 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.index = idx;
 
     const healthData = initialData.health_status || ['Healthy'];
+    const religiousOptions = ['Madrassa Student', 'Madrassa Completed', 'Hafiz', 'Faizy', 'Baqawi', 'Hudawi', 'Darimi', 'Anwari', 'Wafi', 'Saqafi', 'Moulavi', 'Other'];
+    const professionOptions = [
+      'Student', 'Homemaker', 'Doctor', 'Nurse', 'Pharmacist', 'Dentist', 'Teacher', 
+      'Madrassa Teacher', 'Lecturer', 'Professor', 'Mudarris', 'Khatheeb', 'Muadhin', 
+      'Engineer', 'Architect', 'IT Professional', 'Electrician', 'Plumber', 'Carpenter', 
+      'Mechanic', 'Driver', 'Police', 'Military', 'Lawyer', 'Accountant', 'Business Owner', 
+      'Government Employee', 'Private Employee', 'Farmer', 'Retired', 'Unemployed', 'Other'
+    ];
+    const relData = initialData.religious_education || [];
+    const profData = initialData.profession || [];
 
     card.innerHTML = `
       <div class="flex justify-between items-center mb-4 border-b border-zinc-100 pb-2.5">
@@ -371,14 +504,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- Name -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Full Name</label>
-          <input type="text" name="member[${idx}][name]" placeholder="Full Name" value="${initialData.name || ''}"
+          <input type="text" name="member[${idx}][name]" placeholder="Full Name" value="${initialData.name || ''}" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
         </div>
 
         <!-- Gender -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Gender</label>
-          <select name="member[${idx}][gender]"
+          <select name="member[${idx}][gender]" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
             <option value="" disabled ${!initialData.gender ? 'selected' : ''}>-- Select --</option>
             <option value="Male" ${initialData.gender === 'Male' ? 'selected' : ''}>Male</option>
@@ -390,14 +523,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- DOB -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Date of Birth</label>
-          <input type="date" name="member[${idx}][dob]" value="${initialData.dob || ''}" max="${new Date().toISOString().split('T')[0]}"
+          <input type="date" name="member[${idx}][dob]" value="${initialData.dob || ''}" max="${new Date().toISOString().split('T')[0]}" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
         </div>
 
         <!-- Relationship -->
         <div>
-          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Relationship</label>
-          <select name="member[${idx}][relationship]"
+          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Relationship to Head of Family</label>
+          <select name="member[${idx}][relationship]" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
             <option value="" disabled ${!initialData.relationship ? 'selected' : ''}>-- Select --</option>
             <option value="Self" ${initialData.relationship === 'Self' ? 'selected' : ''}>Self (Head)</option>
@@ -419,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- Marital Status -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Marital Status</label>
-          <select name="member[${idx}][marital_status]"
+          <select name="member[${idx}][marital_status]" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
             <option value="" disabled ${!initialData.marital_status ? 'selected' : ''}>-- Select --</option>
             <option value="Unmarried" ${initialData.marital_status === 'Unmarried' ? 'selected' : ''}>Unmarried</option>
@@ -429,43 +562,24 @@ document.addEventListener('DOMContentLoaded', () => {
           </select>
         </div>
 
-        <!-- Educational Qualification -->
-        <div>
-          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Educational Qualification</label>
-          <input type="text" name="member[${idx}][educational_qualification]" placeholder="e.g. SSLC, B.Tech, PG, None" value="${initialData.educational_qualification || ''}"
-            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
-        </div>
-
-        <!-- Religious Education -->
-        <div>
-          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Religious Education</label>
-          <input type="text" name="member[${idx}][religious_education]" placeholder="e.g. Madrassa 5th, None" value="${initialData.religious_education || ''}"
-            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
-        </div>
-
         <!-- Formal Education -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Formal Education</label>
-          <select name="member[${idx}][formal_education]"
-            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
-            <option value="" disabled ${!initialData.formal_education ? 'selected' : ''}>-- Select --</option>
-            <option value="Yes" ${initialData.formal_education === 'Yes' ? 'selected' : ''}>Yes</option>
-            <option value="No" ${initialData.formal_education === 'No' ? 'selected' : ''}>No</option>
-            <option value="Ongoing" ${initialData.formal_education === 'Ongoing' ? 'selected' : ''}>Ongoing</option>
-          </select>
+          <input type="text" name="member[${idx}][formal_education]" placeholder="e.g. SSLC, B.Tech, PG, None" value="${initialData.formal_education || ''}" required
+            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
         </div>
 
-        <!-- Profession -->
+        <!-- Highest Achievement -->
         <div>
-          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Profession</label>
-          <input type="text" name="member[${idx}][profession]" placeholder="e.g. Coolie, Student" value="${initialData.profession || ''}"
+          <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Highest Achievement (if any)</label>
+          <input type="text" name="member[${idx}][highest_achievement]" placeholder="e.g. State Rank, Gold Medal" value="${initialData.highest_achievement || ''}"
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
         </div>
 
         <!-- Blood Group -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Blood Group</label>
-          <select name="member[${idx}][blood_group]"
+          <select name="member[${idx}][blood_group]" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
             <option value="" disabled ${!initialData.blood_group ? 'selected' : ''}>-- Select Group --</option>
             <option value="A+" ${initialData.blood_group === 'A+' ? 'selected' : ''}>A+</option>
@@ -483,13 +597,50 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- Mobile -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Mobile Number</label>
-          <input type="tel" name="member[${idx}][mobile]" placeholder="e.g. 9876543210" value="${initialData.mobile || ''}"
+          <input type="tel" name="member[${idx}][mobile]" placeholder="e.g. 9876543210" value="${initialData.mobile || ''}" required
             class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+        </div>
+
+        <!-- Religious Education Checkboxes -->
+        <div class="sm:col-span-2 md:col-span-3 border-t border-zinc-100 pt-4 mt-2">
+          <span class="block text-[10px] font-medium text-zinc-500 mb-2 uppercase tracking-wider">Religious Education (Multiple Selection)</span>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-zinc-50/50 p-3 rounded-xl border border-zinc-150">
+            ${religiousOptions.map(opt => `
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" name="member[${idx}][religious_education][${opt}]" value="${opt}" ${relData.includes(opt) ? 'checked' : ''}
+                  class="member-${idx}-rel-checkbox mt-0.5 h-3.5 w-3.5 rounded text-brand-600 focus:ring-brand-600 border-zinc-300 cursor-pointer">
+                <span class="ml-2 text-xs text-zinc-700 font-medium">${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+          <div class="mt-2.5 hidden" id="relOtherContainer-${idx}">
+            <label class="block text-[9px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Specify Other Religious Education</label>
+            <input type="text" name="member[${idx}][religious_education_other]" placeholder="Please specify religious degree" value="${initialData.religious_education_other || ''}"
+              class="block w-full px-3.5 py-2 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+          </div>
+        </div>
+
+        <!-- Profession Checkboxes -->
+        <div class="sm:col-span-2 md:col-span-3 border-t border-zinc-100 pt-4 mt-2">
+          <span class="block text-[10px] font-medium text-zinc-500 mb-2 uppercase tracking-wider">Profession (Multiple Selection)</span>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 bg-zinc-50/50 p-3 rounded-xl border border-zinc-150">
+            ${professionOptions.map(opt => `
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" name="member[${idx}][profession][${opt}]" value="${opt}" ${profData.includes(opt) ? 'checked' : ''}
+                  class="member-${idx}-prof-checkbox mt-0.5 h-3.5 w-3.5 rounded text-brand-600 focus:ring-brand-600 border-zinc-300 cursor-pointer">
+                <span class="ml-2 text-xs text-zinc-700 font-medium">${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+          <div class="mt-2.5 hidden" id="profOtherContainer-${idx}">
+            <label class="block text-[9px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Specify Other Profession</label>
+            <input type="text" name="member[${idx}][profession_other]" placeholder="Please specify profession" value="${initialData.profession_other || ''}"
+              class="block w-full px-3.5 py-2 bg-white border border-zinc-250 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+          </div>
         </div>
 
         <!-- Health Status -->
         <div class="sm:col-span-2 md:col-span-3 border-t border-zinc-100 pt-4 mt-2">
-          <span class="block text-[10px] font-medium text-zinc-400 mb-2.5 uppercase tracking-wider">Health Status</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <label class="flex items-start cursor-pointer">
               <input type="checkbox" name="member[${idx}][health][Healthy]" value="Healthy" ${healthData.includes('Healthy') ? 'checked' : ''}
@@ -576,6 +727,54 @@ document.addEventListener('DOMContentLoaded', () => {
         cb.disabled = true;
         cb.parentElement.classList.add('opacity-50', 'pointer-events-none');
       });
+    }
+
+    // Show/hide other religious education specify input
+    const relCheckboxGroup = card.querySelectorAll(`.member-${idx}-rel-checkbox`);
+    const relOtherCb = Array.from(relCheckboxGroup).find(cb => cb.value === 'Other');
+    const relOtherCont = card.querySelector(`#relOtherContainer-${idx}`);
+    if (relOtherCb && relOtherCont) {
+      const toggleRelOther = () => {
+        if (relOtherCb.checked) {
+          relOtherCont.classList.remove('hidden');
+          relOtherCont.querySelector('input').setAttribute('required', 'true');
+        } else {
+          relOtherCont.classList.add('hidden');
+          relOtherCont.querySelector('input').removeAttribute('required');
+          relOtherCont.querySelector('input').value = '';
+          clearFieldError(relOtherCont.querySelector('input'));
+        }
+      };
+      relOtherCb.addEventListener('change', () => {
+        toggleRelOther();
+        saveState();
+      });
+      // Initial toggle
+      toggleRelOther();
+    }
+
+    // Show/hide other profession specify input
+    const profCheckboxGroup = card.querySelectorAll(`.member-${idx}-prof-checkbox`);
+    const profOtherCb = Array.from(profCheckboxGroup).find(cb => cb.value === 'Other');
+    const profOtherCont = card.querySelector(`#profOtherContainer-${idx}`);
+    if (profOtherCb && profOtherCont) {
+      const toggleProfOther = () => {
+        if (profOtherCb.checked) {
+          profOtherCont.classList.remove('hidden');
+          profOtherCont.querySelector('input').setAttribute('required', 'true');
+        } else {
+          profOtherCont.classList.add('hidden');
+          profOtherCont.querySelector('input').removeAttribute('required');
+          profOtherCont.querySelector('input').value = '';
+          clearFieldError(profOtherCont.querySelector('input'));
+        }
+      };
+      profOtherCb.addEventListener('change', () => {
+        toggleProfOther();
+        saveState();
+      });
+      // Initial toggle
+      toggleProfOther();
     }
 
     // Bind inputs changes to auto save
@@ -882,24 +1081,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Surveyed By Role Toggle (using event delegation on form)
+  // Save state on role change
   form.addEventListener('change', (e) => {
     if (e.target.name === 'surveyed_by_role') {
-      if (e.target.value === 'Assistant') {
-        if (assistantNameContainer) {
-          assistantNameContainer.classList.remove('hidden');
-          setInputsRequired(assistantNameContainer, true);
-        }
-      } else {
-        if (assistantNameContainer) {
-          assistantNameContainer.classList.add('hidden');
-          setInputsRequired(assistantNameContainer, false);
-          const assistantInput = document.getElementById('assistant_name');
-          if (assistantInput) assistantInput.value = '';
-        }
-      }
       saveState();
     }
+  });
+
+  // Surveyed By Role Toggle
+  const surveyedByRoleRadios = document.getElementsByName('surveyed_by_role');
+  const surveyedByNameInput = document.getElementById('surveyed_by_name');
+
+  function toggleSurveyedByRoleSection(role) {
+    if (!assistantNameContainer) return;
+    if (role === 'Assistant') {
+      assistantNameContainer.classList.remove('hidden');
+      if (surveyedByNameInput) {
+        surveyedByNameInput.setAttribute('required', 'true');
+      }
+    } else {
+      assistantNameContainer.classList.add('hidden');
+      if (surveyedByNameInput) {
+        surveyedByNameInput.removeAttribute('required');
+        surveyedByNameInput.value = '';
+        clearFieldError(surveyedByNameInput);
+      }
+    }
+  }
+
+  surveyedByRoleRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      toggleSurveyedByRoleSection(e.target.value);
+      saveState();
+    });
   });
 
   // Details Provided By Type Toggle
@@ -969,11 +1183,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Standard Inputs key values mapping
     for (let [key, val] of rawData.entries()) {
       // Skip array formatted parameters that we pull explicitly
-      if (key.startsWith('member[') || key.startsWith('expatriate[')) {
+      if (key.startsWith('member[') || key.startsWith('expatriate[') || key.startsWith('student[')) {
         continue;
       }
       
-
       data[key] = val;
     }
 
@@ -985,10 +1198,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const dob = form.querySelector(`[name="member[${idx}][dob]"]`)?.value || '';
       const relationship = form.querySelector(`[name="member[${idx}][relationship]"]`)?.value || '';
       const marital_status = form.querySelector(`[name="member[${idx}][marital_status]"]`)?.value || '';
-      const educational_qualification = form.querySelector(`[name="member[${idx}][educational_qualification]"]`)?.value || '';
-      const religious_education = form.querySelector(`[name="member[${idx}][religious_education]"]`)?.value || '';
       const formal_education = form.querySelector(`[name="member[${idx}][formal_education]"]`)?.value || '';
-      const profession = form.querySelector(`[name="member[${idx}][profession]"]`)?.value || '';
+      const highest_achievement = form.querySelector(`[name="member[${idx}][highest_achievement]"]`)?.value || '';
       const blood_group = form.querySelector(`[name="member[${idx}][blood_group]"]`)?.value || '';
       const mobile = form.querySelector(`[name="member[${idx}][mobile]"]`)?.value || '';
 
@@ -1001,19 +1212,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+      // Capture religious education list (multi-select)
+      const religiousEducationList = [];
+      const relCbs = form.querySelectorAll(`[name^="member[${idx}][religious_education]["]`);
+      relCbs.forEach(cb => {
+        if (cb.checked) {
+          religiousEducationList.push(cb.value);
+        }
+      });
+      const religious_education_other = form.querySelector(`[name="member[${idx}][religious_education_other]"]`)?.value || '';
+
+      // Capture profession list (multi-select)
+      const professionList = [];
+      const profCbs = form.querySelectorAll(`[name^="member[${idx}][profession]["]`);
+      profCbs.forEach(cb => {
+        if (cb.checked) {
+          professionList.push(cb.value);
+        }
+      });
+      const profession_other = form.querySelector(`[name="member[${idx}][profession_other]"]`)?.value || '';
+
       data.members.push({ 
         name, 
         gender, 
         dob, 
         relationship, 
         marital_status, 
-        educational_qualification, 
-        religious_education, 
         formal_education, 
-        profession, 
+        highest_achievement,
+        religious_education: religiousEducationList,
+        religious_education_other,
+        profession: professionList,
+        profession_other,
         blood_group, 
         mobile, 
         health_status: healthStatuses 
+      });
+    });
+
+    // Capture dynamic Students data
+    data.students = [];
+    students.forEach(s => {
+      const memberIdx = s.memberIdx;
+      const institution_name = form.querySelector(`[name="student[${memberIdx}][institution_name]"]`)?.value || '';
+      const class_course = form.querySelector(`[name="student[${memberIdx}][class_course]"]`)?.value || '';
+      const career_goal = form.querySelector(`[name="student[${memberIdx}][career_goal]"]`)?.value || '';
+      const student_achievements = form.querySelector(`[name="student[${memberIdx}][student_achievements]"]`)?.value || '';
+
+      data.students.push({
+        memberIdx,
+        institution_name,
+        class_course,
+        career_goal,
+        student_achievements
       });
     });
 
@@ -1056,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Restore simple keys
       for (let key in state) {
-        if (key === 'members' || key === 'expatriates' || key === 'health_status' || key === 'currentStepIdx') {
+        if (key === 'members' || key === 'expatriates' || key === 'students' || key === 'health_status' || key === 'currentStepIdx') {
           continue;
         }
 
@@ -1119,21 +1370,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const expatCheck = form.querySelector('input[name="has_expatriates"]:checked')?.value;
       toggleExpatriatesSection(expatCheck);
 
-      const surveyedByRoleCheck = form.querySelector('input[name="surveyed_by_role"]:checked')?.value;
-      if (surveyedByRoleCheck === 'Assistant') {
-        if (assistantNameContainer) {
-          assistantNameContainer.classList.remove('hidden');
-          setInputsRequired(assistantNameContainer, true);
-        }
-      } else {
-        if (assistantNameContainer) {
-          assistantNameContainer.classList.add('hidden');
-          setInputsRequired(assistantNameContainer, false);
-        }
-      }
-
       const detailsProvidedByCheck = state.details_provided_by_type || '';
       toggleDetailsProvidedBySection(detailsProvidedByCheck);
+
+      const surveyedByRoleCheck = form.querySelector('input[name="surveyed_by_role"]:checked')?.value || 'Cluster Coordinator';
+      toggleSurveyedByRoleSection(surveyedByRoleCheck);
 
       // Restore Step position
       if (typeof state.currentStepIdx === 'number' && state.currentStepIdx < STEPS.length) {
@@ -1155,7 +1396,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Bind change/input listeners for auto save
   form.querySelectorAll('input, select, textarea').forEach(element => {
     // Exclude dynamically handled elements to prevent double triggers
-    if (!element.name.startsWith('member[') && !element.name.startsWith('expatriate[')) {
+    if (!element.name.startsWith('member[') && !element.name.startsWith('expatriate[') && !element.name.startsWith('student[')) {
       element.addEventListener('change', () => {
         saveState();
         if (element.id === 'total_members') {
@@ -1202,7 +1443,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleSurveySubmission() {
     // Validate final step before processing
-    if (!validateStep('H')) return;
+    if (!validateStep('I')) return;
 
     // Collect all data
     const completeState = getFormState();
@@ -1298,15 +1539,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Core columns headers
     let csvRows = [];
     const headers = [
-      'Reference Key', 'Submitted At', 'Surveyed By Role', 'Coordinator Name', 'Assistant Name', 'Respondent Role', 'Respondent Name', 'GIS Location', 'Cluster', 
-      'House Number', 'Panchayat', 'Ward Number', 'House Name', 'Family Head', 'House Owner Gender', 
-      'Contact Number', 'WhatsApp (Head)', 'WhatsApp (Senior Lady)', 'Total Family Members', 'Number of Males', 'Number of Females', 'Donation Status', 
+      'Reference Key', 'Submitted At', 'Surveyed By Role', 'Surveyed By Name', 'Respondent Role', 'Respondent Name', 'GIS Location', 'Cluster', 
+      'House Number', 'Panchayat', 'Ward Number', 'House Name', 'Family Head', 
+      'Contact Number', 'WhatsApp (Head)', 'WhatsApp (Senior Lady)', 'Total Family Members', 'Number of Males', 'Number of Females', 
       'House Ownership', 'House Loan Status', 'Type of House', 'House Structure', 'Vehicle Ownership', 'Vehicle Status', 
       'Two Wheelers', 'Three Wheelers', 'Four Wheelers', 'Heavy Vehicles', 'Financial Assistance Received', 'Assistance Source', 
-      'Expatriates Count', 'Office Status', 'Office Verified By', 'Office Remarks',
+      'Expatriates Count', 'Office Verified By', 'Office Remarks', 'Remarks from Head of Family', 'Suggestions to Mahallu',
       'Member Name', 'Member Gender', 'Member DOB', 'Member Relation', 'Member Marital Status', 
-      'Member Educational Qualification', 'Member Religious Education', 'Member Formal Education', 
-      'Member Profession', 'Member Blood Group', 'Member Mobile', 'Member Health Status'
+      'Member Formal Education', 'Member Highest Achievement', 'Member Religious Education', 
+      'Member Profession', 'Member Blood Group', 'Member Mobile', 'Member Health Status',
+      'Student Institution', 'Student Class Course', 'Student Career Goal', 'Student Achievements'
     ];
     csvRows.push(headers.join(','));
 
@@ -1317,8 +1559,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `"${ref}"`,
       `"${submitted}"`,
       `"${data.surveyed_by_role || 'Cluster Coordinator'}"`,
-      `"${(data.coordinator_name || '').replace(/"/g, '""')}"`,
-      `"${(data.assistant_name || '').replace(/"/g, '""')}"`,
+      `"${(data.surveyed_by_name || '').replace(/"/g, '""')}"`,
       `"${(data.details_provided_by_type || '').replace(/"/g, '""')}"`,
       `"${(data.details_provided_by_name || '').replace(/"/g, '""')}"`,
       `"${(data.gis_location || '').replace(/"/g, '""')}"`,
@@ -1328,14 +1569,12 @@ document.addEventListener('DOMContentLoaded', () => {
       `"${data.ward_number}"`,
       `"${data.house_name.replace(/"/g, '""')}"`,
       `"${data.family_head.replace(/"/g, '""')}"`,
-      `"${data.house_owner_gender || 'Male'}"`,
       `"${data.contact_number}"`,
       `"${data.whatsapp_head || ''}"`,
       `"${data.whatsapp_senior_lady || ''}"`,
       `"${data.total_members}"`,
       `"${data.male_count || 0}"`,
       `"${data.female_count || 0}"`,
-      `"${data.donation_status}"`,
       `"${data.house_ownership}"`,
       `"${data.house_loan_status}"`,
       `"${data.house_type}"`,
@@ -1349,33 +1588,53 @@ document.addEventListener('DOMContentLoaded', () => {
       `"${data.financial_assistance}"`,
       `"${(data.assistance_source || '').replace(/"/g, '""')}"`,
       `"${expatsCount}"`,
-      `"${data.office_status || 'Pending'}"`,
       `"${(data.office_verified_by || '').replace(/"/g, '""')}"`,
-      `"${(data.office_remarks || '').replace(/"/g, '""')}"`
+      `"${(data.office_remarks || '').replace(/"/g, '""')}"`,
+      `"${(data.head_remarks || '').replace(/"/g, '""')}"`,
+      `"${(data.committee_suggestions || '').replace(/"/g, '""')}"`
     ];
 
     if (data.members && data.members.length > 0) {
-      data.members.forEach(m => {
+      data.members.forEach((m, mIdx) => {
+        // Look up student details for this member
+        const studentInfo = data.students?.find(s => parseInt(s.memberIdx) === mIdx) || {};
+        const studentInstitution = studentInfo.institution_name || '';
+        const studentClassCourse = studentInfo.class_course || '';
+        const studentCareerGoal = studentInfo.career_goal || '';
+        const studentAchievements = studentInfo.student_achievements || '';
+
+        // Format religious education & profession (handling arrays)
+        const relEdStr = (m.religious_education || []).join('; ') + (m.religious_education_other ? ` (Other: ${m.religious_education_other})` : '');
+        const profStr = (m.profession || []).join('; ') + (m.profession_other ? ` (Other: ${m.profession_other})` : '');
+
         const memberCols = [
           `"${m.name.replace(/"/g, '""')}"`,
           `"${m.gender}"`,
           `"${m.dob}"`,
           `"${m.relationship}"`,
           `"${m.marital_status}"`,
-          `"${(m.educational_qualification || '').replace(/"/g, '""')}"`,
-          `"${(m.religious_education || '').replace(/"/g, '""')}"`,
-          `"${m.formal_education || ''}"`,
-          `"${m.profession.replace(/"/g, '""')}"`,
+          `"${(m.formal_education || '').replace(/"/g, '""')}"`,
+          `"${(m.highest_achievement || '').replace(/"/g, '""')}"`,
+          `"${relEdStr.replace(/"/g, '""')}"`,
+          `"${profStr.replace(/"/g, '""')}"`,
           `"${m.blood_group}"`,
           `"${(m.mobile || '').replace(/"/g, '""')}"`,
           `"${(m.health_status || []).join('; ')}"`
         ];
-        csvRows.push([...baseCols, ...memberCols].join(','));
+
+        const studentCols = [
+          `"${studentInstitution.replace(/"/g, '""')}"`,
+          `"${studentClassCourse.replace(/"/g, '""')}"`,
+          `"${studentCareerGoal.replace(/"/g, '""')}"`,
+          `"${studentAchievements.replace(/"/g, '""')}"`
+        ];
+
+        csvRows.push([...baseCols, ...memberCols, ...studentCols].join(','));
       });
     } else {
-      // Empty members columns if none
-      const emptyMemberCols = ['', '', '', '', '', '', '', '', '', '', '', ''];
-      csvRows.push([...baseCols, ...emptyMemberCols].join(','));
+      // Empty member and student columns if no members
+      const emptyCols = Array(16).fill('""');
+      csvRows.push([...baseCols, ...emptyCols].join(','));
     }
 
     // Prepare content & download anchor
@@ -1408,6 +1667,8 @@ document.addEventListener('DOMContentLoaded', () => {
       form.reset();
       membersContainer.innerHTML = '';
       members = [];
+      studentsContainer.innerHTML = '';
+      students = [];
       expatriatesList.innerHTML = '';
       expatriates = [];
       finalCompiledData = null;
@@ -1425,16 +1686,14 @@ document.addEventListener('DOMContentLoaded', () => {
       expatriatesDetailsSection.classList.add('hidden');
       setInputsRequired(expatriatesDetailsSection, false);
 
-
+      if (detailsProvidedByNameContainer) {
+        detailsProvidedByNameContainer.classList.add('hidden');
+        setInputsRequired(detailsProvidedByNameContainer, false);
+      }
 
       if (assistantNameContainer) {
         assistantNameContainer.classList.add('hidden');
         setInputsRequired(assistantNameContainer, false);
-      }
-
-      if (detailsProvidedByNameContainer) {
-        detailsProvidedByNameContainer.classList.add('hidden');
-        setInputsRequired(detailsProvidedByNameContainer, false);
       }
       
       // Jump to step 0
