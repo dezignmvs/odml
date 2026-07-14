@@ -197,10 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function deleteRecord(itemId) {
     if (confirm(`Are you sure you want to delete the record for ID: ${itemId}?`)) {
+      // Convert slashed formatted ID into safe flat Firestore document ID
+      const docId = itemId.replace(/\//g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
       // 1. Delete from Firestore
-      db.collection("submissions").doc(itemId).delete()
+      db.collection("submissions").doc(docId).delete()
         .then(() => {
-          console.log(`Document ${itemId} deleted successfully from Firestore.`);
+          console.log(`Document ${docId} deleted successfully from Firestore.`);
         })
         .catch(err => {
           console.error("Error deleting from Firestore:", err);
@@ -638,7 +640,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+  // Survey Login Toggle Setting
+  const surveyLoginSetting = document.getElementById('surveyLoginSetting');
+
+  async function loadLoginSetting() {
+    try {
+      const doc = await db.collection("settings").doc("config").get();
+      if (doc.exists) {
+        const loginRequired = doc.data().survey_login_required !== false;
+        if (surveyLoginSetting) {
+          surveyLoginSetting.value = loginRequired ? 'yes' : 'no';
+        }
+      }
+    } catch (e) {
+      console.error("Error loading survey login setting:", e);
+    }
+  }
+
+  if (surveyLoginSetting) {
+    surveyLoginSetting.addEventListener('change', async (e) => {
+      const loginRequired = e.target.value === 'yes';
+      try {
+        await db.collection("settings").doc("config").set({
+          survey_login_required: loginRequired
+        }, { merge: true });
+        localStorage.setItem('survey_login_required', loginRequired ? 'true' : 'false');
+      } catch (err) {
+        console.error("Error saving survey login setting:", err);
+        alert("Failed to update Survey Login setting in the database.");
+      }
+    });
+  }
+
   // Load and Render
+  loadLoginSetting();
   loadSubmissions();
 
 });

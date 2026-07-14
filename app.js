@@ -885,6 +885,32 @@ document.addEventListener('DOMContentLoaded', () => {
     card.className = 'expatriate-card bg-white border border-zinc-200 rounded-2xl p-5 relative transition duration-200 hover:border-zinc-300 shadow-sm';
     card.dataset.index = idx;
 
+    let contactCountryCode = '+91';
+    let contactPhone = '';
+    
+    if (initialData.contact) {
+      const contactVal = initialData.contact.trim();
+      const parts = contactVal.split(' ');
+      if (parts.length > 1 && parts[0].startsWith('+')) {
+        contactCountryCode = parts[0];
+        contactPhone = parts.slice(1).join(' ');
+      } else {
+        const commonCodes = ['+91', '+971', '+966', '+974', '+968', '+973', '+965', '+44', '+1'];
+        let matched = false;
+        for (let code of commonCodes) {
+          if (contactVal.startsWith(code)) {
+            contactCountryCode = code;
+            contactPhone = contactVal.substring(code.length).trim();
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          contactPhone = contactVal;
+        }
+      }
+    }
+
     card.innerHTML = `
       <div class="flex justify-between items-center mb-4 border-b border-zinc-100 pb-2.5">
         <h4 class="text-xs font-semibold text-zinc-800 flex items-center gap-1.5 uppercase tracking-wider">
@@ -914,15 +940,29 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- Contact -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Contact Number</label>
-          <input type="tel" name="expatriate[${idx}][contact]" placeholder="with Country Code" value="${initialData.contact || ''}"
-            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+          <div class="flex gap-2">
+            <select name="expatriate[${idx}][country_code]"
+              class="w-24 px-2 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+              <option value="+91" ${contactCountryCode === '+91' ? 'selected' : ''}>IN +91</option>
+              <option value="+971" ${contactCountryCode === '+971' ? 'selected' : ''}>UAE +971</option>
+              <option value="+966" ${contactCountryCode === '+966' ? 'selected' : ''}>KSA +966</option>
+              <option value="+974" ${contactCountryCode === '+974' ? 'selected' : ''}>QA +974</option>
+              <option value="+968" ${contactCountryCode === '+968' ? 'selected' : ''}>OM +968</option>
+              <option value="+973" ${contactCountryCode === '+973' ? 'selected' : ''}>BH +973</option>
+              <option value="+965" ${contactCountryCode === '+965' ? 'selected' : ''}>KW +965</option>
+              <option value="+44" ${contactCountryCode === '+44' ? 'selected' : ''}>UK +44</option>
+              <option value="+1" ${contactCountryCode === '+1' ? 'selected' : ''}>US +1</option>
+            </select>
+            <input type="tel" name="expatriate[${idx}][contact_phone]" placeholder="e.g. 501234567" value="${contactPhone}"
+              class="flex-grow px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+          </div>
         </div>
 
         <!-- Profession -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Profession</label>
           <input type="text" name="expatriate[${idx}][profession]" placeholder="e.g. Driver" value="${initialData.profession || ''}"
-            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+            class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
         </div>
       </div>
     `;
@@ -936,7 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Bind inputs changes to auto save
-    card.querySelectorAll('input').forEach(input => {
+    card.querySelectorAll('input, select').forEach(input => {
       const handler = () => {
         saveState();
       };
@@ -992,7 +1032,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      const inputs = card.querySelectorAll('input');
+      const inputs = card.querySelectorAll('input, select');
       inputs.forEach(input => {
         const nameAttr = input.getAttribute('name');
         if (nameAttr) {
@@ -1043,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
     radio.addEventListener('change', (e) => {
       if (e.target.value === 'Yes') {
         vehicleDetailsContainer.classList.remove('hidden');
-        setInputsRequired(vehicleDetailsContainer, true);
+        // Do not make vehicle inputs required
       } else {
         vehicleDetailsContainer.classList.add('hidden');
         setInputsRequired(vehicleDetailsContainer, false);
@@ -1273,7 +1313,9 @@ document.addEventListener('DOMContentLoaded', () => {
     expatriates.forEach((e, idx) => {
       const name = form.querySelector(`[name="expatriate[${idx}][name]"]`)?.value || '';
       const country = form.querySelector(`[name="expatriate[${idx}][country]"]`)?.value || '';
-      const contact = form.querySelector(`[name="expatriate[${idx}][contact]"]`)?.value || '';
+      const countryCode = form.querySelector(`[name="expatriate[${idx}][country_code]"]`)?.value || '';
+      const contactPhone = form.querySelector(`[name="expatriate[${idx}][contact_phone]"]`)?.value || '';
+      const contact = countryCode && contactPhone ? `${countryCode} ${contactPhone}` : (contactPhone || countryCode);
       const profession = form.querySelector(`[name="expatriate[${idx}][profession]"]`)?.value || '';
 
       data.expatriates.push({ name, country, contact, profession });
@@ -1352,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const vehicleCheck = form.querySelector('input[name="vehicle_ownership"]:checked')?.value;
       if (vehicleCheck === 'Yes') {
         vehicleDetailsContainer.classList.remove('hidden');
-        setInputsRequired(vehicleDetailsContainer, true);
+        // Do not make vehicle inputs required
       } else {
         vehicleDetailsContainer.classList.add('hidden');
         setInputsRequired(vehicleDetailsContainer, false);
@@ -1448,11 +1490,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Collect all data
     const completeState = getFormState();
     
-    // Add Metadata Details (sanitize to remove slashes and other invalid path characters)
-    const clusterClean = (completeState.cluster || '').replace(/[^a-zA-Z0-9]/g, '');
-    const wardClean = (completeState.ward_number || '').toString().replace(/[^a-zA-Z0-9]/g, '');
-    const houseNumClean = (completeState.house_number || '').replace(/[^a-zA-Z0-9]/g, '');
-    const referenceKey = `ODML${clusterClean}${wardClean}${houseNumClean}`;
+    // Extract cluster alphabet (e.g. "A" from "Block A")
+    const clusterStr = (completeState.cluster || '').trim();
+    const clusterAlphabet = clusterStr.length > 0 ? clusterStr.slice(-1) : '';
+    const wardNo = (completeState.ward_number || '').toString().trim();
+    const houseNo = (completeState.house_number || '').trim();
+    
+    // Formatted ID with slashes: ODML/BL/{clusterAlphabet}/{wardNo}/{houseNo}
+    const formattedId = `ODML/BL/${clusterAlphabet}/${wardNo}/${houseNo}`;
+    
+    // Safe flat referenceKey for Firestore doc ID (replace slashes with hyphens, filter special chars)
+    const referenceKey = formattedId.replace(/\//g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
     const timestampStr = new Date().toLocaleString();
 
     completeState.metadata = {
@@ -1464,12 +1512,12 @@ document.addEventListener('DOMContentLoaded', () => {
     finalCompiledData = completeState;
 
     const recordPayload = {
-      id: referenceKey,
+      id: formattedId, // Use formatted slashed ID inside document
       submittedAt: timestampStr,
       ...completeState
     };
 
-    // Save to Firestore Database
+    // Save to Firestore Database (using safe flat referenceKey)
     db.collection("submissions").doc(referenceKey).set(recordPayload)
       .then(() => {
         console.log("Data successfully uploaded to Firestore:", referenceKey);
@@ -1487,7 +1535,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Populate Modal UI
-        if (modalRefKey) modalRefKey.textContent = referenceKey;
+        if (modalRefKey) modalRefKey.textContent = formattedId;
         if (modalTimestamp) modalTimestamp.textContent = timestampStr;
 
         // Display Modal
@@ -1738,7 +1786,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (downloadCsvBtn) downloadCsvBtn.addEventListener('click', downloadCsv);
   if (closeModalBtn) closeModalBtn.addEventListener('click', resetFormAndStartNew);
 
+  // Check settings in Firestore
+  async function checkSurveyLoginRequiredSetting() {
+    try {
+      const doc = await db.collection("settings").doc("config").get();
+      if (doc.exists) {
+        const loginRequired = doc.data().survey_login_required !== false;
+        // Update cache
+        localStorage.setItem('survey_login_required', loginRequired ? 'true' : 'false');
+        // Apply flow
+        if (typeof window.applyLoginFlow === 'function') {
+          window.applyLoginFlow(loginRequired);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to check login config from Firestore:", e);
+    }
+  }
+
   // Initialize and run state restore
+  checkSurveyLoginRequiredSetting();
   restoreFormState();
 
 });

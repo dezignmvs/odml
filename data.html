@@ -61,6 +61,19 @@
       </div>
       
       <div class="flex items-center gap-3">
+        <!-- Survey Login Toggle -->
+        <div class="flex items-center gap-2 bg-zinc-50 border border-zinc-200 px-3 py-2 rounded-xl">
+          <span class="text-[10px] font-bold text-zinc-500 flex items-center gap-1 uppercase tracking-wider">
+            <i class="fa-solid fa-key text-[10px] text-indigo-600"></i>
+            <span>Survey Login</span>
+          </span>
+          <select id="surveyLoginSetting" 
+            class="bg-transparent text-xs font-bold text-zinc-900 focus:outline-none cursor-pointer">
+            <option value="yes">Yes (Enabled)</option>
+            <option value="no">No (Disabled)</option>
+          </select>
+        </div>
+
         <a href="index.html" class="flex items-center gap-1.5 px-3.5 py-2 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-xs font-semibold rounded-xl border border-zinc-200 transition duration-150">
           <i class="fa-solid fa-arrow-left text-[10px]"></i>
           <span>Back to Survey</span>

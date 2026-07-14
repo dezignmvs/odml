@@ -3,31 +3,53 @@
 <head>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Check cached settings first (defaults to true if not set)
+      const cachedLoginRequired = localStorage.getItem('survey_login_required') !== 'false';
       const isLoggedIn = sessionStorage.getItem('census_logged_in') === 'true';
       const landingPage = document.getElementById('landingPage');
       const surveyApp = document.getElementById('surveyApp');
+      const btnIndexLogout = document.getElementById('btnIndexLogout');
       
-      if (isLoggedIn) {
-        if (surveyApp) {
-          surveyApp.classList.remove('hidden');
-          surveyApp.classList.add('flex');
-        }
-      } else {
-        if (landingPage) {
-          landingPage.classList.remove('hidden');
-        }
-        
-        // Bind Start button
-        const btnStartSurvey = document.getElementById('btnStartSurvey');
-        if (btnStartSurvey) {
-          btnStartSurvey.addEventListener('click', () => {
-            window.location.href = 'login.html?redirect=index.html';
-          });
+      function applyLoginFlow(loginRequired) {
+        if (!loginRequired) {
+          // Bypass login completely
+          if (landingPage) landingPage.classList.add('hidden');
+          if (surveyApp) {
+            surveyApp.classList.remove('hidden');
+            surveyApp.classList.add('flex');
+          }
+          if (btnIndexLogout) btnIndexLogout.classList.add('hidden');
+        } else {
+          // Standard login flow
+          if (isLoggedIn) {
+            if (landingPage) landingPage.classList.add('hidden');
+            if (surveyApp) {
+              surveyApp.classList.remove('hidden');
+              surveyApp.classList.add('flex');
+            }
+            if (btnIndexLogout) btnIndexLogout.classList.remove('hidden');
+          } else {
+            if (surveyApp) {
+              surveyApp.classList.remove('flex');
+              surveyApp.classList.add('hidden');
+            }
+            if (landingPage) landingPage.classList.remove('hidden');
+            
+            // Bind Start button
+            const btnStartSurvey = document.getElementById('btnStartSurvey');
+            if (btnStartSurvey) {
+              btnStartSurvey.onclick = () => {
+                window.location.href = 'login.html?redirect=index.html';
+              };
+            }
+          }
         }
       }
 
+      // Apply initial check based on cache
+      applyLoginFlow(cachedLoginRequired);
+
       // Bind Logout button
-      const btnIndexLogout = document.getElementById('btnIndexLogout');
       if (btnIndexLogout) {
         btnIndexLogout.addEventListener('click', () => {
           sessionStorage.removeItem('census_logged_in');
@@ -35,6 +57,9 @@
           window.location.reload();
         });
       }
+
+      // Store function on window for app.js background updates
+      window.applyLoginFlow = applyLoginFlow;
     });
   </script>
   <meta charset="UTF-8">
@@ -340,7 +365,7 @@
 
                 <!-- Panchayat -->
                 <div>
-                  <label for="panchayat" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Panchayat / Municipality</label>
+                  <label for="panchayat" class="block text-[11px] font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">Panchayat</label>
                   <input type="text" id="panchayat" name="panchayat" placeholder="e.g. Odamala Panchayat"
                     class="block w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 placeholder:text-zinc-400 text-xs shadow-sm transition duration-150">
                 </div>

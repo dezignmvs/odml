@@ -5,5 +5,9 @@ service cloud.firestore {
     match /submissions/{submissionId} {
       allow read, write: if true;
     }
+    // Settings collection rules
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
   }
 }
