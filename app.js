@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
           Family Member #${idx + 1}
         </h4>
         <button type="button" class="remove-member-btn text-[10px] text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg font-semibold uppercase tracking-wider flex items-center gap-1 transition"
-          style="${idx === 0 ? 'display: none;' : ''}">
+          style="display: none;">
           Remove
         </button>
       </div>
@@ -839,11 +839,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Update Remove Button Visibility
       const removeBtn = card.querySelector('.remove-member-btn');
       if (removeBtn) {
-        if (currentIdx === 0) {
-          removeBtn.style.display = 'none';
-        } else {
-          removeBtn.style.display = 'flex';
-        }
+        removeBtn.style.display = 'none';
       }
 
       // Update inputs names attributes
@@ -873,6 +869,78 @@ document.addEventListener('DOMContentLoaded', () => {
       membersMismatchWarning.classList.remove('hidden');
     } else {
       membersMismatchWarning.classList.add('hidden');
+    }
+  }
+
+  function updateTotalMembersSum() {
+    const totalMembersEl = document.getElementById('total_members');
+    const maleCountEl = document.getElementById('male_count');
+    const femaleCountEl = document.getElementById('female_count');
+    if (totalMembersEl && maleCountEl && femaleCountEl) {
+      const male = parseInt(maleCountEl.value) || 0;
+      const female = parseInt(femaleCountEl.value) || 0;
+      totalMembersEl.value = male + female;
+      
+      // Sync member cards with demographics
+      syncMemberCardsWithDemographics();
+      
+      // Trigger validation alert update
+      validateMembersCountAlert();
+    }
+  }
+
+  function syncMemberCardsWithDemographics() {
+    const maleCountEl = document.getElementById('male_count');
+    const femaleCountEl = document.getElementById('female_count');
+    if (!maleCountEl || !femaleCountEl) return;
+
+    const maleCount = parseInt(maleCountEl.value) || 0;
+    const femaleCount = parseInt(femaleCountEl.value) || 0;
+    const totalMembers = maleCount + femaleCount;
+
+    if (totalMembers === 0) return; // Keep existing cards or let them change later
+
+    const currentCount = members.length;
+    if (totalMembers > currentCount) {
+      // Need to add cards
+      const diff = totalMembers - currentCount;
+      
+      // Determine what genders are already defined in the existing cards
+      let existingMales = 0;
+      let existingFemales = 0;
+      members.forEach(m => {
+        const genderSelect = m.element.querySelector(`[name="member[${m.id}][gender]"]`);
+        if (genderSelect) {
+          if (genderSelect.value === 'Male') existingMales++;
+          else if (genderSelect.value === 'Female') existingFemales++;
+        }
+      });
+
+      // Calculate how many more males and females we should add to match the counts
+      let neededMales = Math.max(0, maleCount - existingMales);
+      let neededFemales = Math.max(0, femaleCount - existingFemales);
+
+      for (let i = 0; i < diff; i++) {
+        let gender = '';
+        if (neededMales > 0) {
+          gender = 'Male';
+          neededMales--;
+        } else if (neededFemales > 0) {
+          gender = 'Female';
+          neededFemales--;
+        }
+        addMember({ gender: gender });
+      }
+    } else if (totalMembers < currentCount) {
+      // Need to remove cards from the end
+      const diff = currentCount - totalMembers;
+      for (let i = 0; i < diff; i++) {
+        if (members.length <= 1) break;
+        const lastMember = members[members.length - 1];
+        lastMember.element.remove();
+        members.pop();
+      }
+      reindexMembers();
     }
   }
 
@@ -933,16 +1001,44 @@ document.addEventListener('DOMContentLoaded', () => {
         <!-- Country -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Country</label>
-          <input type="text" name="expatriate[${idx}][country]" placeholder="e.g. UAE" value="${initialData.country || ''}"
-            class="block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+          <select name="expatriate[${idx}][country]"
+            class="expatriate-country-select block w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+            <option value="" disabled ${!initialData.country ? 'selected' : ''}>-- Select --</option>
+            <option value="India" ${initialData.country === 'India' ? 'selected' : ''}>India</option>
+            <option value="UAE" ${initialData.country === 'UAE' ? 'selected' : ''}>UAE</option>
+            <option value="Saudi Arabia" ${initialData.country === 'Saudi Arabia' ? 'selected' : ''}>Saudi Arabia</option>
+            <option value="Qatar" ${initialData.country === 'Qatar' ? 'selected' : ''}>Qatar</option>
+            <option value="Oman" ${initialData.country === 'Oman' ? 'selected' : ''}>Oman</option>
+            <option value="Bahrain" ${initialData.country === 'Bahrain' ? 'selected' : ''}>Bahrain</option>
+            <option value="Kuwait" ${initialData.country === 'Kuwait' ? 'selected' : ''}>Kuwait</option>
+            <option value="United Kingdom" ${initialData.country === 'United Kingdom' ? 'selected' : ''}>United Kingdom</option>
+            <option value="United States" ${initialData.country === 'United States' ? 'selected' : ''}>United States</option>
+            <option value="Canada" ${initialData.country === 'Canada' ? 'selected' : ''}>Canada</option>
+            <option value="Australia" ${initialData.country === 'Australia' ? 'selected' : ''}>Australia</option>
+            <option value="Malaysia" ${initialData.country === 'Malaysia' ? 'selected' : ''}>Malaysia</option>
+            <option value="Singapore" ${initialData.country === 'Singapore' ? 'selected' : ''}>Singapore</option>
+            <option value="Germany" ${initialData.country === 'Germany' ? 'selected' : ''}>Germany</option>
+            <option value="France" ${initialData.country === 'France' ? 'selected' : ''}>France</option>
+            <option value="Italy" ${initialData.country === 'Italy' ? 'selected' : ''}>Italy</option>
+            <option value="Ireland" ${initialData.country === 'Ireland' ? 'selected' : ''}>Ireland</option>
+            <option value="New Zealand" ${initialData.country === 'New Zealand' ? 'selected' : ''}>New Zealand</option>
+            <option value="Maldives" ${initialData.country === 'Maldives' ? 'selected' : ''}>Maldives</option>
+            <option value="Yemen" ${initialData.country === 'Yemen' ? 'selected' : ''}>Yemen</option>
+            <option value="Jordan" ${initialData.country === 'Jordan' ? 'selected' : ''}>Jordan</option>
+            <option value="Egypt" ${initialData.country === 'Egypt' ? 'selected' : ''}>Egypt</option>
+            <option value="Sudan" ${initialData.country === 'Sudan' ? 'selected' : ''}>Sudan</option>
+            <option value="Nigeria" ${initialData.country === 'Nigeria' ? 'selected' : ''}>Nigeria</option>
+            <option value="South Africa" ${initialData.country === 'South Africa' ? 'selected' : ''}>South Africa</option>
+            <option value="Other" ${initialData.country === 'Other' ? 'selected' : ''}>Other</option>
+          </select>
         </div>
 
         <!-- Contact -->
         <div>
           <label class="block text-[10px] font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Contact Number</label>
-          <div class="flex gap-2">
+          <div class="flex flex-col gap-1.5">
             <select name="expatriate[${idx}][country_code]"
-              class="w-24 px-2 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
+              class="w-full px-3 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150 cursor-pointer">
               <option value="+91" ${contactCountryCode === '+91' ? 'selected' : ''}>IN +91</option>
               <option value="+971" ${contactCountryCode === '+971' ? 'selected' : ''}>UAE +971</option>
               <option value="+966" ${contactCountryCode === '+966' ? 'selected' : ''}>KSA +966</option>
@@ -952,9 +1048,24 @@ document.addEventListener('DOMContentLoaded', () => {
               <option value="+965" ${contactCountryCode === '+965' ? 'selected' : ''}>KW +965</option>
               <option value="+44" ${contactCountryCode === '+44' ? 'selected' : ''}>UK +44</option>
               <option value="+1" ${contactCountryCode === '+1' ? 'selected' : ''}>US +1</option>
+              <option value="+61" ${contactCountryCode === '+61' ? 'selected' : ''}>AUS +61</option>
+              <option value="+60" ${contactCountryCode === '+60' ? 'selected' : ''}>MY +60</option>
+              <option value="+65" ${contactCountryCode === '+65' ? 'selected' : ''}>SG +65</option>
+              <option value="+49" ${contactCountryCode === '+49' ? 'selected' : ''}>DE +49</option>
+              <option value="+33" ${contactCountryCode === '+33' ? 'selected' : ''}>FR +33</option>
+              <option value="+39" ${contactCountryCode === '+39' ? 'selected' : ''}>IT +39</option>
+              <option value="+353" ${contactCountryCode === '+353' ? 'selected' : ''}>IE +353</option>
+              <option value="+64" ${contactCountryCode === '+64' ? 'selected' : ''}>NZ +64</option>
+              <option value="+960" ${contactCountryCode === '+960' ? 'selected' : ''}>MV +960</option>
+              <option value="+967" ${contactCountryCode === '+967' ? 'selected' : ''}>YE +967</option>
+              <option value="+962" ${contactCountryCode === '+962' ? 'selected' : ''}>JO +962</option>
+              <option value="+20" ${contactCountryCode === '+20' ? 'selected' : ''}>EG +20</option>
+              <option value="+249" ${contactCountryCode === '+249' ? 'selected' : ''}>SD +249</option>
+              <option value="+234" ${contactCountryCode === '+234' ? 'selected' : ''}>NG +234</option>
+              <option value="+27" ${contactCountryCode === '+27' ? 'selected' : ''}>ZA +27</option>
             </select>
             <input type="tel" name="expatriate[${idx}][contact_phone]" placeholder="e.g. 501234567" value="${contactPhone}"
-              class="flex-grow px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
+              class="w-full px-3.5 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600/10 focus:border-brand-600 text-zinc-900 text-xs shadow-sm transition duration-150">
           </div>
         </div>
 
@@ -972,6 +1083,46 @@ document.addEventListener('DOMContentLoaded', () => {
     if (removeBtn) {
       removeBtn.addEventListener('click', () => {
         removeExpatriate(idx);
+      });
+    }
+
+    // Bind country select auto-update listener
+    const countrySelect = card.querySelector('.expatriate-country-select');
+    const countryCodeSelect = card.querySelector(`select[name="expatriate[${idx}][country_code]"]`);
+    if (countrySelect && countryCodeSelect) {
+      countrySelect.addEventListener('change', (e) => {
+        const country = e.target.value;
+        const mapping = {
+          'India': '+91',
+          'UAE': '+971',
+          'Saudi Arabia': '+966',
+          'Qatar': '+974',
+          'Oman': '+968',
+          'Bahrain': '+973',
+          'Kuwait': '+965',
+          'United Kingdom': '+44',
+          'United States': '+1',
+          'Canada': '+1',
+          'Australia': '+61',
+          'Malaysia': '+60',
+          'Singapore': '+65',
+          'Germany': '+49',
+          'France': '+33',
+          'Italy': '+39',
+          'Ireland': '+353',
+          'New Zealand': '+64',
+          'Maldives': '+960',
+          'Yemen': '+967',
+          'Jordan': '+962',
+          'Egypt': '+20',
+          'Sudan': '+249',
+          'Nigeria': '+234',
+          'South Africa': '+27'
+        };
+        if (mapping[country]) {
+          countryCodeSelect.value = mapping[country];
+        }
+        saveState();
       });
     }
 
@@ -1370,6 +1521,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      // Update Total Members Sum after loading simple values
+      updateTotalMembersSum();
+
       // Restore dynamic Family Members
       membersContainer.innerHTML = '';
       members = [];
@@ -1440,12 +1594,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exclude dynamically handled elements to prevent double triggers
     if (!element.name.startsWith('member[') && !element.name.startsWith('expatriate[') && !element.name.startsWith('student[')) {
       element.addEventListener('change', () => {
+        if (element.id === 'male_count' || element.id === 'female_count') {
+          updateTotalMembersSum();
+        }
         saveState();
         if (element.id === 'total_members') {
           validateMembersCountAlert();
         }
       });
       element.addEventListener('input', () => {
+        if (element.id === 'male_count' || element.id === 'female_count') {
+          updateTotalMembersSum();
+        }
         saveState();
         if (element.id === 'total_members') {
           validateMembersCountAlert();
@@ -1496,8 +1656,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const wardNo = (completeState.ward_number || '').toString().trim();
     const houseNo = (completeState.house_number || '').trim();
     
-    // Formatted ID with slashes: ODML/BL/{clusterAlphabet}/{wardNo}/{houseNo}
-    const formattedId = `ODML/BL/${clusterAlphabet}/${wardNo}/${houseNo}`;
+    // Formatted ID: exactly the house number
+    const formattedId = houseNo;
     
     // Safe flat referenceKey for Firestore doc ID (replace slashes with hyphens, filter special chars)
     const referenceKey = formattedId.replace(/\//g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
